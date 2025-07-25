@@ -119,9 +119,9 @@ const ReadyDesignCart = () => {
           setPin_Code_Valid(true);
           setPin_Code_Loader(false);
         } else if (res?.status === "false") {
-          setPin_Code_Err("");
-          setPin_Code_Msg("Service not available");
-          setPin_Code_Valid(false);
+          setPin_Code_Err("Service available");
+          // setPin_Code_Msg("Service not available");
+          setPin_Code_Valid(true);
           setPin_Code_Loader(false);
         }
       })

@@ -12,10 +12,19 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 const validationSchema = Yup.object({
-  email: Yup.string()
-    .email("Invalid email format")
-    .required("Email is required"),
-  password: Yup.string()
+login: Yup.string()
+    .test(
+      "email-or-phone",
+      "Enter a valid email or 10-digit phone number",
+      value => {
+        if (!value) return false;
+        const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+        const phoneRegex = /^\d{10}$/;
+        return emailRegex.test(value) || phoneRegex.test(value);
+      }
+    )
+    .required("Email or phone number is required"),
+password: Yup.string()
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
 });
@@ -56,7 +65,16 @@ const DealerLogin = () => {
     }
 
     setSpinner(true);
-    mutation.mutate({ email: values.email, password: values.password });
+    // Send either email or phone depending on input
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    const phoneRegex = /^\d{10}$/;
+    let payload = { password: values.password };
+    if (emailRegex.test(values.login)) {
+      payload.email = values.login;
+    } else if (phoneRegex.test(values.login)) {
+      payload.phone = values.login;
+    }
+    mutation.mutate(payload);
   };
 
   const [passwordType, setPasswordType] = useState("password");
@@ -82,7 +100,7 @@ const DealerLogin = () => {
                 <h2 className="mb-4">Dealer Login</h2>
 
                 <Formik
-                  initialValues={{ email: "", password: "" }}
+                  initialValues={{ login: "", password: "" }}
                   validationSchema={validationSchema}
                   onSubmit={handleSubmit}
                 >
@@ -91,12 +109,12 @@ const DealerLogin = () => {
                       <div className="form-group">
                         <Field
                           type="text"
-                          name="email"
-                          placeholder="Registered Email ID"
+                          name="login"
+                          placeholder="Enter your email or 10-digit mobile number"
                           className="form-control"
                         />
                         <ErrorMessage
-                          name="email"
+                          name="login"
                           component="span"
                           className="text-danger"
                         />
