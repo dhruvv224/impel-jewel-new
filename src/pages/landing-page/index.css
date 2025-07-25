@@ -1,0 +1,596 @@
+.navbar-head-main {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  background-color: #cb7f61;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar .navbar-nav .nav-link-name a {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.impel-jewel-logo {
+  height: 60px;
+}
+
+.img-info h3 {
+  font-size: 35px;
+  color: #000;
+  font-weight: 600;
+}
+
+.img-info p {
+  color: #000;
+  font-weight: 400;
+}
+
+.img-info button {
+  padding: 7px 38px;
+  background-color: hsl(18.11deg 50.48% 58.82%);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 2px;
+}
+
+.contact-us-btn {
+  background-color: rgb(255 255 255 / 83%);
+  border-radius: 8px;
+  border-width: 0;
+  color: #333333;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 500;
+  list-style: none;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: center;
+  transition: all 200ms;
+  vertical-align: baseline;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  letter-spacing: 1px;
+}
+
+.inquire-btn {
+  background-color: rgb(255 255 255 / 83%);
+  border-radius: 8px;
+  border-width: 0;
+  color: #333333;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 500;
+  list-style: none;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: center;
+  transition: all 200ms;
+  vertical-align: baseline;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  letter-spacing: 1px;
+}
+
+.banner-main {
+  height: calc(100vh - 81px);
+}
+
+@media (max-width: 767px) {
+  .banner-main {
+    height: 100%;
+  }
+}
+
+@media (max-width: 991px) {
+  .banner-main {
+    height: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .banner-main {
+    height: 100%;
+  }
+}
+
+.product-section .product-info-text-name h1 {
+  margin: 35px 0;
+  font-size: 36px;
+  color: #000;
+}
+
+.product-section p {
+  color: #666;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.product-section .img-info p {
+  color: #000;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Product Section Start */
+.product-section,
+.latest-news,
+.trending-product {
+  padding: 25px;
+}
+
+.footer-section {
+  padding: 8px 25px;
+}
+
+.footer_copyright h2 {
+  text-align: center;
+}
+
+.trending-product {
+  background-color: #f8e1e1;
+}
+
+.trending-product h2 {
+  color: #000;
+  font-weight: 600;
+  font-size: 30px;
+  margin-bottom: 25px;
+}
+
+.insta-section {
+  background-color: #f3f3f3;
+}
+
+/* Product Section End */
+
+.product-card {
+  position: relative;
+  /* margin: 35px auto; */
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.product-card .product-card-name {
+  position: absolute;
+  width: 200px;
+  background-color: #fff;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  bottom: 10px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  cursor: pointer;
+}
+
+.product-card .product-card-name h5 {
+  margin: 0;
+}
+
+.product-info-text h4 {
+  color: rgb(203, 127, 97);
+  font-weight: 500;
+  font-size: 26px;
+}
+
+.product-info-text {
+  margin-bottom: 35px;
+}
+
+.product-info-text p {
+  margin: 0;
+}
+
+.latest_product_info h3 {
+  font-size: 30px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.latest_product_info .form-group {
+  display: flex;
+  align-items: center;
+}
+
+.latest_product_info input {
+  border: none !important;
+  border-bottom: 2px solid #000 !important;
+  border-radius: 0 !important;
+  margin-right: 15px !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.latest_product_info .inq_btn {
+  border-bottom: 2px solid #000;
+  border-radius: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.latest_product_info .inq_btn:active {
+  border: none !important;
+  border-bottom: 2px solid #000 !important;
+}
+
+.product-card .badge {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 700;
+  background: green;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 5px 0 !important;
+}
+
+.product-tumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* background: #f0f0f0; */
+}
+
+.product-tumb img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.product-details {
+  padding: 30px;
+  text-align: center;
+}
+
+.product-catagory {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ccc;
+  margin-bottom: 18px;
+}
+
+.product-details h4 a {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  color: #000;
+  text-decoration: none;
+  transition: 0.3s;
+  font-size: 18px;
+}
+
+.product-details h4 a:hover {
+  color: #fbb72c;
+}
+
+.product-details p {
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: #999;
+  margin: 0;
+}
+
+.product-bottom-details {
+  overflow: hidden;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.product-bottom-details div {
+  float: left;
+  width: 50%;
+}
+
+.product-price {
+  font-size: 18px;
+  color: #fbb72c;
+  font-weight: 600;
+}
+
+.product-price small {
+  font-size: 80%;
+  font-weight: 400;
+  text-decoration: line-through;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.product-links {
+  text-align: right;
+}
+
+.product-links a {
+  display: inline-block;
+  margin-left: 5px;
+  color: #e1e1e1;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+.product-links a:hover {
+  color: #fbb72c;
+}
+
+.instagram-icon {
+  font-size: 45px;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 50%;
+  padding: 5px;
+  margin-bottom: 8px;
+}
+
+.product-text h4 {
+  color: #000;
+  font-weight: 600;
+  font-size: 30px;
+}
+
+.newsletter h3 {
+  color: rgb(203, 127, 97);
+  font-weight: 600;
+  font-size: 30px;
+}
+
+.form-main {
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.form-main .main-wrapper {
+  border-radius: 8px;
+  padding: 30px;
+  width: 100%;
+  box-shadow: 0 0 5px 5px #00000020;
+  backdrop-filter: blur(5px);
+  background-color: #ffffff85;
+}
+
+.form-main .main-wrapper .form-head {
+  font-size: 30px;
+  line-height: 40px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0px 0 25px;
+  color: #000;
+}
+.form-main .main-wrapper .form-wrapper {
+  width: 100%;
+}
+
+.middle-banner-sec,
+.love-section,
+.insta-section,
+.latest-news {
+  padding: 40px 25px;
+}
+
+.love-section h2 {
+  font-size: 35px;
+  padding-bottom: 15px;
+}
+
+.insta-section .product-text {
+  margin-bottom: 35px;
+}
+
+@media (max-width: 767px) {
+  .navbar .header_inner {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .navbar .navbar-nav .nav-link-name a {
+    color: #000;
+  }
+
+  .navbar-toggler:focus {
+    box-shadow: none !important;
+  }
+
+  .collapsing {
+    transition: none !important;
+  }
+
+  .impel-jewel-logo {
+    height: 40px;
+  }
+
+  .contact-us-btn {
+    padding: 0;
+  }
+
+  .product-section,
+  .trending-product,
+  .insta-section {
+    padding: 15px 20px;
+  }
+
+  .product-section .product-card,
+  .trending-product .product-card,
+  .insta-section .insta-image {
+    margin-bottom: 20px;
+  }
+
+  .middle-banner-sec .row .col-md-6:first-child {
+    order: 2;
+  }
+
+  .middle-banner-sec .row:last-child .col-md-6:first-child {
+    order: 1;
+  }
+
+  .middle-banner-sec .row .col-md-6:last-child {
+    order: 1;
+  }
+
+  .middle-banner-sec .row:last-child .col-md-6:last-child {
+    order: 2;
+  }
+
+  .middle-banner-sec {
+    padding-bottom: 40px;
+  }
+
+  .img-info {
+    margin-bottom: 20px;
+  }
+
+  .img-info h3 {
+    font-size: 30px;
+  }
+
+  .location-map {
+    margin-bottom: 35px;
+  }
+  .form-main .main-wrapper {
+    padding: 20px;
+  }
+}
+
+@media only screen and (max-width: 991px) {
+  .navbar .navbar-nav .nav-link-name a {
+    color: #000;
+  }
+
+  .collapse ul {
+    align-items: flex-start;
+  }
+}
+.form-wrapper-main .form-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  display: block;
+  color: gray;
+}
+
+/* Input Styling */
+.form-wrapper-main .custom-input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.form-wrapper-main .custom-input:focus {
+  border-color: hsl(18.11deg 50.48% 58.82%);
+  box-shadow: 0 0 4px rgba(63, 81, 181, 0.2);
+}
+
+.form-wrapper-main .custom-input.is-invalid {
+  border-color: #f44336;
+}
+
+/* Feedback Messages */
+.form-wrapper-main .invalid-feedback {
+  color: #e10f00;
+  margin-top: 0;
+}
+
+/* Submit Button */
+.form-wrapper-main .submit-button {
+  padding: 10px 38px;
+  background-color: hsl(18.11deg 50.48% 58.82%);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 5px;
+}
+
+.thank-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  background-image: url("../../assets/images/bg-01.jpeg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.thank-modal .modal-content {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.thank-modal .icon-wrapper {
+  margin: 0 auto 16px;
+}
+
+.thank-modal .icon {
+  height: 48px;
+  width: 48px;
+  color: #22c55e;
+}
+
+.thank-modal .modal-title {
+  font-size: 2rem; /* Tailwind's text-lg equivalent */
+  font-weight: 500; /* Tailwind's font-medium equivalent */
+  color: #111827; /* Tailwind's gray-900 equivalent */
+  margin-bottom: 8px;
+}
+
+.thank-modal .modal-message {
+  font-size: 1rem; /* Tailwind's text-sm equivalent */
+  color: #6b7280; /* Tailwind's gray-500 equivalent */
+  margin-bottom: 24px;
+}
+
+/* Close Button */
+.thank-modal .modal-close-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 1rem; /* Tailwind's text-sm equivalent */
+  font-weight: 500; /* Tailwind's font-medium equivalent */
+  color: #ffffff;
+  background-color: #22c55e; /* Tailwind's green-600 equivalent */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.thank-modal .modal-close-btn:hover {
+  background-color: #15803d; /* Tailwind's green-700 equivalent */
+}
+
+.thank-modal .modal-close-btn:focus {
+  outline: 2px solid #10b981; /* Tailwind's green-500 equivalent */
+  outline-offset: 2px;
+}

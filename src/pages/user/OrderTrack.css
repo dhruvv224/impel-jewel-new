@@ -1,0 +1,136 @@
+.order-track-section .card {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.1rem;
+}
+
+@media screen and (max-width: 767px) {
+  .order-track-section .card .row {
+    display: grid !important;
+    gap: 18px;
+  }
+
+  .order-track-section .track {
+    margin-bottom: 100px;
+  }
+}
+
+.order-track-section .card-header:first-child {
+  border-radius: calc(0.37rem - 1px) calc(0.37rem - 1px) 0 0;
+}
+.order-track-section .card-header {
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 0;
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.order-track-section .track {
+  position: relative;
+  background-color: #ddd;
+  height: 7px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-bottom: 70px;
+  margin-top: 50px;
+}
+.order-track-section .track .step {
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  width: 25%;
+  margin-top: -18px;
+  text-align: center;
+  position: relative;
+}
+.order-track-section .track .step.active:before {
+  background: #ff5722;
+}
+.order-track-section .track .step::before {
+  height: 7px;
+  position: absolute;
+  content: "";
+  width: 100%;
+  left: 0;
+  top: 18px;
+}
+.order-track-section .track .step.active .icon {
+  background: #ee5435;
+  color: #fff;
+}
+.order-track-section .track .icon {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  position: relative;
+  border-radius: 100%;
+  background: #ddd;
+}
+.order-track-section .track .step.active .text {
+  font-weight: 400;
+  color: #000;
+}
+.order-track-section .track .text {
+  display: block;
+  margin-top: 7px;
+}
+.order-track-section .itemside {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+}
+.order-track-section .itemside .aside {
+  position: relative;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+.order-track-section .img-sm {
+  width: 120px;
+  height: 120px;
+  padding: 7px;
+}
+.order-track-section ul.row,
+.order-track-section ul.row-sm {
+  list-style: none;
+  padding: 0;
+}
+.order-track-section .itemside .info {
+  padding-left: 15px;
+  padding-right: 7px;
+}
+.order-track-section .itemside .title {
+  display: block;
+  margin-bottom: 5px;
+  color: #212529;
+  font-weight: 800;
+}
+.order-track-section p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+.order-track-section .btn-warning {
+  color: #ffffff;
+  background-color: #db9662;
+  border-color: #db9662;
+  border-radius: 3px;
+  font-weight: 600;
+}
+.order-track-section .btn-warning:hover {
+  color: #ffffff;
+  background-color: #ff2b00;
+  border-color: #ff2b00;
+}
