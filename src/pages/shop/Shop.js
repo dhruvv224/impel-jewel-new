@@ -66,6 +66,7 @@ const Shop = () => {
   });
 
   const totalPages = Math.ceil(paginate / pagination?.dataShowLength);
+  const { tag_id } = location.state || {};
 
   const scrollup = () => {
     window.scrollTo({
@@ -201,7 +202,7 @@ const Shop = () => {
       const filterResponse = await ShopServices.allfilterdesigns({
         category_id: Number(currentCategory) || null,
         gender_id: Number(currentGender) || null,
-        tag_id: Number(currentTag) || null,
+        tag_id: Number(tag_id) || null,
         search: currentSearch,
         min_price: Number(currentMinPrice) || null,
         max_price: Number(currentMaxPrice) || null,

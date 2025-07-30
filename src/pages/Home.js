@@ -94,7 +94,6 @@ const Home = () => {
     queryFn: () => homeService.RecentAdd(),
     select: (data) => data?.data || [],
   });
-
   const { data: review } = useQuery({
     queryKey: ["TestiMonials"],
     queryFn: () => homeService.TestiMonials(),
@@ -246,8 +245,9 @@ const Home = () => {
                     {category?.map((data, index) => {
                       return (
                         <SwiperSlide key={index}>
-                          <Link
-                            to={`/categories/${data.id}`}
+                        <Link
+                            to={`/categories/${encodeURIComponent(data.name.toLowerCase().replace(/\s+/g, '-'))}`}
+                            state={{ id: data.id, name: data.name }}
                             className="text-decoration-none"
                             style={{ color: "#000" }}
                           >

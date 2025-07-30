@@ -11,6 +11,7 @@ const CategoriesItems = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const paramId = useParams();
+const { id: categoryIdFromState, name: categoryNameFromState } = location.state || {};
   const userId = localStorage.getItem("user_id");
   const email = localStorage.getItem("email");
   const Phone = localStorage.getItem("phone");
@@ -28,10 +29,10 @@ const CategoriesItems = () => {
   }, [currentPageNo, location.search]);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["related_products", paramId?.id, currentPageNo],
+    queryKey: ["related_products", categoryIdFromState, currentPageNo],
     queryFn: () =>
       categoryDetail.related_products({
-        categoryId: Number(paramId?.id),
+        categoryId: Number(categoryIdFromState),
         page: currentPageNo,
       }),
     keepPreviousData: true,
@@ -55,7 +56,7 @@ const CategoriesItems = () => {
   const updatePagination = (page) => {
     const queryParams = new URLSearchParams(location.search);
     queryParams.set("page", page);
-    navigate(`/categories/${paramId?.id}/?${queryParams.toString()}`);
+    navigate(`/categories/${categoryIdFromState}/?${queryParams.toString()}`);
     setPagination((prev) => ({ ...prev, currentPage: page }));
     scrollup();
   };

@@ -385,10 +385,11 @@ const Navbar = () => {
                             {tags?.map((multitags, index) => (
                               <div className="col-md-2" key={index}>
                                 <div className="tags-links">
-                                  <Link
-                                    to={`/shop?tag_id=${multitags.id}`}
-                                    className="nav-link"
-                                  >
+                                 <Link
+                                  to={`/shop/${encodeURIComponent(multitags.name.toLowerCase().replace(/\s+/g, '-'))}`}
+                                  state={{ tag_id: multitags.id }}
+                                  className="nav-link"
+                                >
                                     {multitags.name}
                                   </Link>
                                 </div>

@@ -106,6 +106,8 @@ function App() {
                       />
                       <Route index element={<Home />} />
                       <Route path="shop" element={<Shop />} />
+                      <Route path="shop/:tag" element={<Shop />} />
+
                       <Route
                         path="ready-to-dispatch"
                         element={<ReadytoDispatch />}

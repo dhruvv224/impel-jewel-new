@@ -44,7 +44,8 @@ const Categories = () => {
                     <div className="col-lg-3 col-md-6 col-12 mb-4" key={index}>
                       <div className="category-list-box">
                         <Link
-                          to={`/categories/${data.id}`}
+                          to={`/categories/${encodeURIComponent(data.name.toLowerCase().replace(/\s+/g, '-'))}`}
+                          state={{ id: data.id, name: data.name }}
                           className="text-decoration-none"
                           style={{ color: "#000" }}
                         >
