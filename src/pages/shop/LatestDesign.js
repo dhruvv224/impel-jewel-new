@@ -59,7 +59,8 @@ const LatestDesign = () => {
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.5 }}
                               >
-                                <Link to={`/shopdetails/${data?.id}`}>
+                                <Link to={`/shopdetails/${encodeURIComponent(data.name.toLowerCase().replace(/\s+/g, '-'))}/${data?.code}`}
+                            state={{ id: data.id, name: data.name }}>
                                   <div className="product-thumb">
                                     {data?.image ? (
                                       <>

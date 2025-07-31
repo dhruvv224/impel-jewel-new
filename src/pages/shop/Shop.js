@@ -32,6 +32,7 @@ const Shop = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+    const { tag_id } = location.state || {};
 
   const userType = localStorage.getItem("user_type");
   const userId = localStorage.getItem("user_id");
@@ -65,8 +66,12 @@ const Shop = () => {
     dataShowLength: 40,
   });
 
+  // Extract tag name from URL path
+  const tagNameFromUrl = location.pathname.split("/shop/")[1]
+    ? decodeURIComponent(location.pathname.split("/shop/")[1].replace(/-/g, " "))
+    : null;
+
   const totalPages = Math.ceil(paginate / pagination?.dataShowLength);
-  const { tag_id } = location.state || {};
 
   const scrollup = () => {
     window.scrollTo({
@@ -95,7 +100,9 @@ const Shop = () => {
       queryParams.delete("search");
     }
     navigate(
-      `/shop${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
     );
   };
 
@@ -109,7 +116,6 @@ const Shop = () => {
     setPriceRange({ minprice: null, maxprice: null });
     queryParams.delete("search");
     queryParams.delete("gender_id");
-    queryParams.delete("tag_id");
     queryParams.delete("sort_by");
     queryParams.delete("min_price");
     queryParams.delete("max_price");
@@ -121,7 +127,9 @@ const Shop = () => {
     }
 
     navigate(
-      `/shop${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
     );
     setSelectedCategory(categoryId);
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
@@ -136,7 +144,11 @@ const Shop = () => {
     } else {
       queryParams.delete("sort_by");
     }
-    navigate(`/shop?${queryParams.toString()}`);
+    navigate(
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
+    );
     setSelectedOption(selectedSort);
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
@@ -150,7 +162,11 @@ const Shop = () => {
     } else {
       queryParams.delete("gender_id");
     }
-    navigate(`/shop?${queryParams.toString()}`);
+    navigate(
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
+    );
     setSelectedGender(genderId);
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
@@ -159,12 +175,11 @@ const Shop = () => {
     setIsLoading(true);
     const queryParams = new URLSearchParams(location.search);
     queryParams.delete("page");
-    if (selectedTags) {
-      queryParams.set("tag_id", selectedTags.value);
-    } else {
-      queryParams.delete("tag_id");
-    }
-    navigate(`/shop?${queryParams.toString()}`);
+    navigate(
+      `/shop${selectedTags ? `/${encodeURIComponent(selectedTags.label.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
+    );
     setSelectedTag(selectedTags);
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
@@ -175,7 +190,11 @@ const Shop = () => {
     queryParams.delete("page");
     queryParams.set("min_price", e[0]);
     queryParams.set("max_price", e[1]);
-    navigate(`/shop?${queryParams.toString()}`);
+    navigate(
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
+    );
     setPriceRange({ minprice: e[0], maxprice: e[1] });
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
@@ -188,9 +207,13 @@ const Shop = () => {
     const currentSearch = queryParams.get("search");
     const currentSort = queryParams.get("sort_by");
     const currentGender = queryParams.get("gender_id");
-    const currentTag = queryParams.get("tag_id");
     const currentMinPrice = queryParams.get("min_price");
     const currentMaxPrice = queryParams.get("max_price");
+
+    // Map tag name to tag_id
+    const currentTag = filterTag.find(
+      (tag) => tag.name.toLowerCase() === tagNameFromUrl?.toLowerCase()
+    )?.id || null;
 
     if (currentPageNo) {
       setPagination((prev) => ({ ...prev, currentPage: currentPageNo }));
@@ -202,7 +225,7 @@ const Shop = () => {
       const filterResponse = await ShopServices.allfilterdesigns({
         category_id: Number(currentCategory) || null,
         gender_id: Number(currentGender) || null,
-        tag_id: Number(tag_id) || null,
+        tag_id: Number(tag_id || currentTag) || null,
         search: currentSearch,
         min_price: Number(currentMinPrice) || null,
         max_price: Number(currentMaxPrice) || null,
@@ -258,22 +281,24 @@ const Shop = () => {
         const Gender_ids = genderRes?.data?.find(
           (item) => item?.id === Number(currentGender)
         );
-        setSelectedGender({
-          value: Gender_ids.id,
-          label: Gender_ids.name,
-        });
+        setSelectedGender(
+          Gender_ids
+            ? { value: Gender_ids.id, label: Gender_ids.name }
+            : null
+        );
       } else {
         setSelectedGender(null);
       }
 
-      if (filterResponse?.data?.tags && currentTag) {
+      if (filterResponse?.data?.tags && tagNameFromUrl) {
         const selectedTagID = filterResponse?.data?.tags?.find(
-          (item) => item?.id === Number(currentTag)
+          (item) => item?.name.toLowerCase() === tagNameFromUrl.toLowerCase()
         );
-        setSelectedTag({
-          value: selectedTagID?.id,
-          label: selectedTagID?.name,
-        });
+        setSelectedTag(
+          selectedTagID
+            ? { value: selectedTagID.id, label: selectedTagID.name }
+            : null
+        );
       } else {
         setSelectedTag(null);
       }
@@ -305,7 +330,11 @@ const Shop = () => {
   const updatePagination = (page) => {
     const queryParams = new URLSearchParams(location.search);
     queryParams.set("page", page);
-    navigate(`/shop?${queryParams.toString()}`);
+    navigate(
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
+    );
     setPagination((prev) => ({ ...prev, currentPage: page }));
     setIsLoading(true);
     scrollup();
@@ -329,7 +358,7 @@ const Shop = () => {
 
   useEffect(() => {
     FilterData();
-  }, [location.search]);
+  }, [location.pathname, location.search]);
 
   const GetUserWishList = async () => {
     UserWishlist.userWishlist({ phone: Phone })
@@ -360,13 +389,11 @@ const Shop = () => {
               type: "ADD_TO_WISHLIST",
               payload,
             });
-          } else {
           }
         })
         .catch((err) => {
           console.log(err);
         });
-    } else {
     }
   };
 
@@ -417,13 +444,11 @@ const Shop = () => {
             toast.success("Design has been Added to Your Collection.");
             FilterData();
             GetDealerSelection();
-          } else {
           }
         })
         .catch((err) => {
           console.log(err);
         });
-    } else {
     }
   };
 
@@ -480,7 +505,6 @@ const Shop = () => {
         .catch((err) => {
           console.log(err);
         });
-    } else {
     }
   };
 
@@ -674,7 +698,12 @@ const Shop = () => {
                                     animate={{ opacity: 1 }}
                                     transition={{ duration: 0.5 }}
                                   >
-                                    <Link to={`/shopdetails/${data?.id}`}>
+                                    <Link
+                                      to={`/shopdetails/${encodeURIComponent(
+                                        data.name.toLowerCase().replace(/\s+/g, '-')
+                                      )}/${data?.code}`}
+                                      state={{ id: data.id, name: data.name }}
+                                    >
                                       <div className="product-thumb">
                                         {data?.image ? (
                                           <>
@@ -699,11 +728,6 @@ const Shop = () => {
                                         )}
                                       </div>
                                       <div className="product-info">
-                                        {/* <h4>
-                                          {data?.name}&nbsp;
-                                          <span>({data?.code})</span>
-                                        </h4> */}
-
                                         <div className="product-info d-grid">
                                           {(data?.making_charge_discount_18k >
                                             0 &&
@@ -747,24 +771,19 @@ const Shop = () => {
                                             </strong>
                                           )}
                                         </div>
-
-                                        {/* <label>
-                                          ₹
-                                          {numberFormat(data?.total_amount_18k)}
-                                        </label> */}
+                                        {userType == 1 && (
+                                          <div className="mt-1">
+                                            <span
+                                              style={{
+                                                color: "#db9662",
+                                                fontWeight: 700,
+                                              }}
+                                            >
+                                              {data?.code}
+                                            </span>
+                                          </div>
+                                        )}
                                       </div>
-                                      {userType == 1 && (
-                                        <div className="mt-1">
-                                          <span
-                                            style={{
-                                              color: "#db9662",
-                                              fontWeight: 700,
-                                            }}
-                                          >
-                                            {data?.code}
-                                          </span>
-                                        </div>
-                                      )}
                                     </Link>
                                     <div className="wishlist-top">
                                       {userType == 1 ? (

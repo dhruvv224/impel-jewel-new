@@ -119,7 +119,7 @@ function App() {
 
                       <Route path=":id" element={<CustomPage />} />
 
-                      <Route path="shopdetails/:id" element={<ShopDetails />} />
+                      <Route path="shopdetails/:id/:code" element={<ShopDetails />} />
                       <Route path="categories" element={<Categories />} />
                       <Route
                         path="categories/:id"

@@ -122,7 +122,8 @@ const { id: categoryIdFromState, name: categoryNameFromState } = location.state 
                           <>
                             <div className="col-lg-3 col-md-6 col-12">
                               <div className="item-product text-center">
-                                <Link to={`/shopdetails/${data?.id}`}>
+                                <Link to={`/shopdetails/${encodeURIComponent(data.name.toLowerCase().replace(/\s+/g, '-'))}/${data?.code}`}
+                                state={{ id: data.id, name: data.name }}>
                                   <div className="product-thumb">
                                     {data?.image ? (
                                       <>

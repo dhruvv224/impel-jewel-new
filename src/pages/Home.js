@@ -404,7 +404,8 @@ const Home = () => {
                       return (
                         <SwiperSlide key={index}>
                           <Link
-                            to={`/shopdetails/${data.id}`}
+                            to={`/shopdetails/${encodeURIComponent(data.name.toLowerCase().replace(/\s+/g, '-'))}/${data?.code}`}
+                            state={{ id: data.id, name: data.name }}
                             className="text-decoration-none"
                             style={{ color: "#000" }}
                           >

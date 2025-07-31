@@ -38,6 +38,7 @@ const ShopDetails = () => {
   const { dispatch: addtocartDispatch } = useContext(CartSystem);
 
   const { id } = useParams();
+  const { id: categoryIdFromState, name: categoryNameFromState } = location.state || {};
   const Dealer = localStorage.getItem("email");
   const Phone = localStorage.getItem("phone");
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -55,10 +56,10 @@ const ShopDetails = () => {
   };
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["product_detail", id],
+    queryKey: ["product_detail", categoryIdFromState],
     queryFn: () =>
       productDetail.product_detail({
-        id: id,
+        id: categoryIdFromState,
       }),
     keepPreviousData: true,
     onError: (err) => {
