@@ -55,27 +55,35 @@ const DealerLogin = () => {
     onSettled: () => setSpinner(false),
   });
 
-  const handleSubmit = (values, { setSubmitting, setErrors }) => {
-    const captchaValue = recaptcha.current?.getValue();
+const handleSubmit = (values, { setSubmitting, setErrors }) => {
+  const captchaValue = recaptcha.current?.getValue();
 
-    if (!captchaValue) {
-      setCaptcha("Please verify CAPTCHA.");
-      setSubmitting(false);
-      return;
-    }
+  if (!captchaValue) {
+    setCaptcha("Please verify CAPTCHA.");
+    setSubmitting(false);
+    return;
+  }
 
-    setSpinner(true);
-    // Send either email or phone depending on input
-    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    const phoneRegex = /^\d{10}$/;
-    let payload = { password: values.password };
-    if (emailRegex.test(values.login)) {
-      payload.email = values.login;
-    } else if (phoneRegex.test(values.login)) {
-      payload.phone = values.login;
-    }
-    mutation.mutate(payload);
-  };
+  setSpinner(true);
+
+  const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  const phoneRegex = /^\d{10}$/;
+  let payload = { password: values.password };
+
+  if (emailRegex.test(values.login)) {
+    payload.email = values.login;
+  } else if (phoneRegex.test(values.login)) {
+    payload.phone = values.login;
+  }
+
+  mutation.mutate(payload, {
+    onSettled: () => {
+      setSpinner(false);
+      setSubmitting(false); 
+    },
+  });
+};
+
 
   const [passwordType, setPasswordType] = useState("password");
 

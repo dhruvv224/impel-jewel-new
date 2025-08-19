@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import easyReturn from "../../assets/images/Tags/Warranty.png";
 import plating from "../../assets/images/Tags/Jewellery.png";
 import auth925 from "../../assets/images/Tags/Auth925.png";
+import { FaLongArrowAltLeft } from "react-icons/fa";
 
 const api = process.env.REACT_APP_API_KEY;
 
@@ -461,73 +462,62 @@ const ReadyDetails = () => {
                             </>
                           )}
                         </div>
-                        {phone ? (
-                          <>
-                            {cartItems &&
-                            cartItems?.find(
-                              (item) => item?.tag_no === details?.TagNo
-                            ) ? (
-                              <>
-                                <Link
-                                  className="btn btn-outline-dark"
-                                  to="/ready-design-cart"
-                                >
-                                  <BsCartDash
-                                    style={{
-                                      fontSize: "26px",
-                                      cursor: "pointer",
-                                    }}
-                                  />
-                                </Link>
-                              </>
-                            ) : (
-                              <>
-                                <div>
-                                  <button
-                                    className="btn btn-outline-dark"
-                                    onClick={() => handleAddToCart(details)}
-                                    disabled={spinner}
-                                  >
-                                    {spinner && (
-                                      <CgSpinner
-                                        size={20}
-                                        className="animate_spin"
-                                      />
-                                    )}
-                                    {!spinner && (
-                                      <BsHandbagFill
-                                        style={{
-                                          fontSize: "26px",
-                                          cursor: "pointer",
-                                        }}
-                                      />
-                                    )}
-                                  </button>
-                                </div>
-                              </>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            {phone ? (
-                              <></>
-                            ) : (
-                              <>
-                                <button
-                                  className="btn btn-outline-dark"
-                                  onClick={(e) => UserLogin(e)}
-                                >
-                                  <BsHandbagFill
-                                    style={{
-                                      fontSize: "26px",
-                                      cursor: "pointer",
-                                    }}
-                                  />
-                                </button>
-                              </>
-                            )}
-                          </>
-                        )}
+                       <div className="d-flex align-items-center gap-2">
+  {phone ? (
+    <>
+      {cartItems?.find((item) => item?.tag_no === details?.TagNo) ? (
+        // If already in cart → show cart button
+        <Link className="btn btn-outline-dark" to="/ready-design-cart">
+          <BsCartDash style={{ fontSize: "26px", cursor: "pointer" }} />
+        </Link>
+      ) : (
+        // Add to Cart
+        <button
+          className="btn btn-outline-dark"
+          onClick={() => handleAddToCart(details)}
+          disabled={spinner}
+        >
+          {spinner ? (
+            <CgSpinner size={20} className="animate_spin" />
+          ) : (
+            <BsHandbagFill style={{ fontSize: "26px", cursor: "pointer" }} />
+          )}
+        </button>
+      )}
+
+      {/* 👉 Back to Shop button */}
+      <button
+        className="btn btn-outline-dark px-4 d-flex align-items-center"
+        style={{ borderRadius: "8px" }}
+        onClick={() => navigate(-1)}
+      >
+        <FaLongArrowAltLeft className="me-2" size={18} />
+        Back to Shop
+      </button>
+    </>
+  ) : (
+    <>
+      {/* If not logged in → login first */}
+      <button
+        className="btn btn-outline-dark"
+        onClick={(e) => UserLogin(e)}
+      >
+        <BsHandbagFill style={{ fontSize: "26px", cursor: "pointer" }} />
+      </button>
+
+      <button
+        className="btn btn-outline-dark px-4 d-flex align-items-center"
+        style={{ borderRadius: "8px" }}
+        onClick={() => navigate(-1)}
+      >
+        <FaLongArrowAltLeft className="me-2" size={18} />
+        Back to Shop
+      </button>
+    </>
+  )}
+</div>
+
+
                         {/* {phone && (
                           <>
                             {cartItems &&

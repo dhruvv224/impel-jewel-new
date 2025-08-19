@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { RxCross1 } from "react-icons/rx";
 import { BsCartDash, BsHandbagFill } from "react-icons/bs";
 import { CgSpinner } from "react-icons/cg";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaLongArrowAltLeft, FaRegHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
 import { WishlistSystem } from "../../context/WishListContext";
 import UserCartService from "../../services/Cart";
@@ -1072,135 +1072,75 @@ const ShopDetails = () => {
                               </div>
                             )}
                           </div>
-                          <div className="button d-flex pt-2">
-                            <div className="add_cart align-items-center d-flex">
-                              {Phone ? (
-                                <>
-                                  {cartItems &&
-                                  cartItems?.find(
-                                    (item) => item?.design_id === product?.id
-                                  ) ? (
-                                    <>
-                                      <Link
-                                        className="btn btn-outline-dark"
-                                        to="/cart"
-                                      >
-                                        <BsCartDash
-                                          style={{
-                                            fontSize: "26px",
-                                            cursor: "pointer",
-                                          }}
-                                        />
-                                      </Link>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <div>
-                                        <button
-                                          className="btn btn-outline-dark"
-                                          onClick={() =>
-                                            handleAddToCart(product)
-                                          }
-                                          disabled={spinner}
-                                        >
-                                          {spinner && (
-                                            <CgSpinner
-                                              size={20}
-                                              className="animate_spin"
-                                            />
-                                          )}
-                                          {!spinner && (
-                                            <BsHandbagFill
-                                              style={{
-                                                fontSize: "26px",
-                                                cursor: "pointer",
-                                              }}
-                                            />
-                                          )}
-                                        </button>
-                                      </div>
-                                      <div>
-                                        <button
-                                          className="btn btn-outline-dark align-items-center"
-                                          onClick={() =>
-                                            addToUserWishList(product)
-                                          }
-                                          disabled={UserWishlistItems?.find(
-                                            (item) => item?.id === product?.id
-                                          )}
-                                        >
-                                          {UserWishlistItems?.find(
-                                            (item) => item?.id === product?.id
-                                          ) ? (
-                                            <div className="btn-success">
-                                              <FaHeart
-                                                style={{
-                                                  fontSize: "26px",
-                                                  cursor: "pointer",
-                                                }}
-                                              />
-                                            </div>
-                                          ) : (
-                                            <div className="btn-success">
-                                              {spinner2 && (
-                                                <CgSpinner
-                                                  size={20}
-                                                  className="animate_spin"
-                                                />
-                                              )}
-                                              {!spinner2 && (
-                                                <FaRegHeart
-                                                  style={{
-                                                    fontSize: "26px",
-                                                    cursor: "pointer",
-                                                  }}
-                                                />
-                                              )}
-                                            </div>
-                                          )}
-                                        </button>
-                                      </div>
-                                    </>
-                                  )}
-                                </>
-                              ) : (
-                                <>
-                                  {Dealer ? (
-                                    <></>
-                                  ) : (
-                                    <div
-                                      className="buttons d-flex"
-                                      onClick={(e) => UserLogin(e)}
-                                    >
-                                      <div className="add_cart align-items-center d-flex">
-                                        <div>
-                                          <spam className="btn btn-outline-dark">
-                                            <BsHandbagFill
-                                              style={{
-                                                fontSize: "26px",
-                                                cursor: "pointer",
-                                              }}
-                                            />
-                                          </spam>
-                                        </div>
-                                        <div>
-                                          <span className="btn btn-outline-dark">
-                                            <FaRegHeart
-                                              style={{
-                                                fontSize: "26px",
-                                                cursor: "pointer",
-                                              }}
-                                            />
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </div>
+                       <div className="d-flex justify-content-between align-items-center pt-2">
+  {/* Left side: Add to Cart / Wishlist */}
+  <div className="d-flex align-items-center gap-2">
+    {Phone ? (
+      <>
+        {cartItems?.find((item) => item?.design_id === product?.id) ? (
+          <Link className="btn btn-outline-dark" to="/cart">
+            <BsCartDash style={{ fontSize: "26px", cursor: "pointer" }} />
+          </Link>
+        ) : (
+          <>
+            <button
+              className="btn btn-outline-dark"
+              onClick={() => handleAddToCart(product)}
+              disabled={spinner}
+            >
+              {spinner ? (
+                <CgSpinner size={20} className="animate_spin" />
+              ) : (
+                <BsHandbagFill style={{ fontSize: "26px", cursor: "pointer" }} />
+              )}
+            </button>
 
+            <button
+              className="btn btn-outline-dark"
+              onClick={() => addToUserWishList(product)}
+              disabled={UserWishlistItems?.some(
+                (item) => item?.id === product?.id
+              )}
+            >
+              {UserWishlistItems?.some((item) => item?.id === product?.id) ? (
+                <FaHeart style={{ fontSize: "26px", cursor: "pointer", color: "green" }} />
+              ) : spinner2 ? (
+                <CgSpinner size={20} className="animate_spin" />
+              ) : (
+                <FaRegHeart style={{ fontSize: "26px", cursor: "pointer" }} />
+              )}
+            </button>
+          </>
+        )}
+      </>
+    ) : Dealer ? (
+      <></>
+    ) : (
+      <div className="d-flex align-items-center gap-2" onClick={(e) => UserLogin(e)}>
+        <span className="btn btn-outline-dark">
+          <BsHandbagFill style={{ fontSize: "26px", cursor: "pointer" }} />
+        </span>
+        <span className="btn btn-outline-dark">
+          <FaRegHeart style={{ fontSize: "26px", cursor: "pointer" }} />
+        </span>
+      </div>
+    )}
+  </div>
+
+  {/* Right side: Back to Shop */}
+  <div>
+  <button
+    className="btn btn-outline-dark px-4"
+    style={{ borderRadius: "8px" }}
+    onClick={() => navigate(-1)} 
+  >
+    <FaLongArrowAltLeft className="mr-2" /> Back To Shop
+  </button>
+</div>
+</div>
+
+
+                         
                           {/* {Phone && (
                             <>
                               {cartItems &&

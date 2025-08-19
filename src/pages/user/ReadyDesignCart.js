@@ -680,7 +680,7 @@ const ReadyDesignCart = () => {
     states: "",
     address_same_as_company: "",
   });
-
+console.log(userData, "userData");
   const [error, setError] = useState({
     nameErr: "",
     emailErr: "",
@@ -706,7 +706,7 @@ const ReadyDesignCart = () => {
         console.log(err);
       });
   };
-
+console.log(city,":")
   const fetchShippingCity = async (cityId) => {
     await profileService
       .getCity({ state_id: cityId })
@@ -719,46 +719,53 @@ const ReadyDesignCart = () => {
   };
 
   const getProfile = async () => {
-    await profileService
-      .getProfile({ phone: phone })
-      .then((res) => {
-        const Billing_shipping_state = res.data.state.name;
-        const Billing_shipping_city = res.data.city.name;
-        const shipping_state_name = res.data.shipping_state.name;
-        const shipping_city_name = res.data.shipping_city.name;
-        setProfileData({
-          ...res.data,
-          state_name: Billing_shipping_state,
-          city_name: Billing_shipping_city,
-          shipping_state_name: shipping_state_name,
-          shipping_city_name: shipping_city_name,
-          state: res.data.state.id,
-          city: res.data.city.id,
-          shipping_state: res.data.shipping_state.id,
-          shipping_city: res.data.shipping_city.id,
-        });
-        setUserData({
-          ...res.data,
-          state_name: Billing_shipping_state,
-          city_name: Billing_shipping_city,
-          shipping_state_name: shipping_state_name,
-          shipping_city_name: shipping_city_name,
-          state: res.data.state.id,
-          city: res.data.city.id,
-          shipping_state: res.data.shipping_state.id,
-          shipping_city: res.data.shipping_city.id,
-        });
-        res.data.state.id && fetchCity(res.data.state.id);
-        res.data.shipping_state.id &&
-          fetchShippingCity(res.data.shipping_state.id);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setIsLoading(false);
+  await profileService
+    .getProfile({ phone: phone })
+    .then((res) => {
+      const Billing_shipping_state = res.data.state.name;
+      const Billing_shipping_city = res.data.city.name;
+      const shipping_state_name = res.data.shipping_state.name;
+      const shipping_city_name = res.data.shipping_city.name;
+      
+      setProfileData({
+        ...res.data,
+        state_name: Billing_shipping_state,
+        city_name: Billing_shipping_city,
+        shipping_state_name: shipping_state_name,
+        shipping_city_name: shipping_city_name,
+        state: res.data.state.id,        // State ID
+        city: res.data.city.id,           // City ID
+        shipping_state: res.data.shipping_state.id,  // Shipping state ID
+        shipping_city: res.data.shipping_city.id,    // Shipping city ID
       });
-  };
-
+      
+      setUserData({
+        ...res.data,
+        state_name: Billing_shipping_state,
+        city_name: Billing_shipping_city,
+        shipping_state_name: shipping_state_name,
+        shipping_city_name: shipping_city_name,
+        state: res.data.state.id,       
+        city: res.data.city.id,          
+        shipping_state: res.data.shipping_state.id, 
+        shipping_city: res.data.shipping_city.id,   
+      });
+      
+      res.data.state.id && fetchCity(res.data.state.id);
+      res.data.shipping_state.id &&
+        fetchShippingCity(res.data.shipping_state.id);
+      setIsLoading(false);
+    })
+    .catch((err) => {
+      console.log(err);
+      setIsLoading(false);
+    });
+};
+useEffect(() => {
+  if (userData.shipping_state) {
+    fetchShippingCity(userData.shipping_state);
+  }
+}, [userData.shipping_state]);
   useEffect(() => {
     getProfile();
   }, []);
@@ -914,27 +921,34 @@ const ReadyDesignCart = () => {
     }
   };
 
-  const handleCheckboxChange = (event) => {
-    setIsChecked(event.target.checked);
+ const handleCheckboxChange = (event) => {
+  setIsChecked(event.target.checked);
 
-    if (event.target.checked) {
-      setUserData({
-        ...userData,
-        shipping_address: userData.address,
-        shipping_pincode: userData.pincode,
-        shipping_state: userData.state,
-        shipping_city: userData.city,
-      });
-    } else {
-      setUserData({
-        ...userData,
-        shipping_address: "",
-        shipping_pincode: "",
-        shipping_state: "",
-        shipping_city: "",
-      });
+  if (event.target.checked) {
+    const updatedUserData = {
+      ...userData,
+      shipping_address: userData.address,
+      shipping_pincode: userData.pincode,
+      shipping_state: userData.state,
+      shipping_city: userData.city,
+    };
+    
+    setUserData(updatedUserData);
+    
+    // Fetch shipping cities for the selected state
+    if (userData.state) {
+      fetchShippingCity(userData.state);
     }
-  };
+  } else {
+    setUserData({
+      ...userData,
+      shipping_address: "",
+      shipping_pincode: "",
+      shipping_state: "",
+      shipping_city: "",
+    });
+  }
+};
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -1037,7 +1051,19 @@ const ReadyDesignCart = () => {
 
   const options =
     overAllAmount > 50000 ? ["PhonePay"] : ["Cash on delivery", "PhonePay"];
-
+const DiscountAmount = () => {
+  if (code?.discount_value) {
+    if (code?.discount_type === "percentage") {
+      return (SubCharge() * code.discount_value) / 100;
+    } else {
+      return code.discount_value;
+    }
+  }
+  return 0;
+};
+const SubTotalAfterDiscount = () => {
+  return SubAmount() - DiscountAmount();
+};
   return (
     <>
       <Helmet>
@@ -1193,116 +1219,106 @@ const ReadyDesignCart = () => {
                             </div>
                           )}
                           <div className="card shadow-0 border">
-                            <div className="card-body">
-                              {/* SUB TOTAL :*/}
-                              <div className="d-flex justify-content-between">
-                                <p className="mb-2">Sub total :</p>
-                                <p className="mb-2 fw-bold">
-                                  ₹{numberFormat(SubAmount())}
-                                </p>
-                              </div>
-                              <hr />
+  <div className="card-body">
+    {/* SUB TOTAL :*/}
+    <div className="d-flex justify-content-between">
+      <p className="mb-2">Price :</p>
+      <p className="mb-2 fw-bold">
+        ₹{numberFormat(SubAmount())}
+      </p>
+    </div>
+    <hr />
 
-                              {/* GST TOTAL :*/}
-                              <div className="d-flex justify-content-between">
-                                <p className="mb-2">GST (3%) :</p>
-                                <p className="mb-2 fw-bold">
-                                  ₹{numberFormat(SubGST()?.toFixed())}
-                                </p>
-                              </div>
-                              <hr />
+    {/* DISCOUNT (if applied) */}
+    {message && code?.discount_value && (
+      <>
+        <div className="d-flex justify-content-between">
+          <p className="mb-2 text-success">Discount :</p>
+          <p className="mb-2 fw-bold text-success">
+            - ₹{numberFormat(DiscountAmount())}
+          </p>
+        </div>
+        <hr />
+        
+        {/* SUBTOTAL AFTER DISCOUNT */}
+        <div className="d-flex justify-content-between">
+          <p className="mb-2">Subtotal  :</p>
+          <p className="mb-2 fw-bold">
+            ₹{numberFormat(SubTotalAfterDiscount())}
+          </p>
+        </div>
+        <hr />
+      </>
+    )}
 
-                              {/* TOTAL PRICE :*/}
-                              <div className="d-flex justify-content-between">
-                                <p className="mb-2">Total price :</p>
-                                <div>
-                                  {message ? (
-                                    <>
-                                      <del className="text-danger me-2">
-                                        ₹{numberFormat(SubAmount() + SubGST())}
-                                      </del>
-                                      <span className="fw-bold text-success">
-                                        ₹{numberFormat(overAllAmount)}
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <p className="mb-2 fw-bold">
-                                        {code?.discount_value ? (
-                                          <>
-                                            ₹
-                                            {code?.discount_type ===
-                                            "percentage"
-                                              ? numberFormat(overAllAmount)
-                                              : numberFormat(overAllAmount)}
-                                          </>
-                                        ) : (
-                                          <>₹{numberFormat(overAllAmount)}</>
-                                        )}
-                                      </p>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                              <hr />
+    {/* GST TOTAL :*/}
+    <div className="d-flex justify-content-between">
+      <p className="mb-2">GST (3%) :</p>
+      <p className="mb-2 fw-bold">
+        ₹{numberFormat(SubGST()?.toFixed())}
+      </p>
+    </div>
+    <hr />
 
-                              {message && (
-                                <>
-                                  <div className="d-flex justify-content-between">
-                                    <p className="mb-2 fw-bold text-success">
-                                      Discount :
-                                    </p>
-                                    <p className="mb-2 fw-bold text-success">
-                                      - ₹
-                                      {code?.discount_type === "fixed"
-                                        ? numberFormat(code.discount_value)
-                                        : numberFormat(
-                                            (SubCharge() *
-                                              code.discount_value) /
-                                              100
-                                          )}
-                                    </p>
-                                  </div>
-                                  <hr />
-                                </>
-                              )}
+    {/* TOTAL PRICE :*/}
+    <div className="d-flex justify-content-between">
+      <p className="mb-2">Total price :</p>
+      <div>
+        {message ? (
+          <>
+            <del className="text-danger me-2">
+              ₹{numberFormat(SubAmount() + (SubAmount() * 0.03))}
+            </del>
+            <span className="fw-bold text-success">
+              ₹{numberFormat(overAllAmount)}
+            </span>
+          </>
+        ) : (
+          <>
+            <p className="mb-2 fw-bold">
+              ₹{numberFormat(overAllAmount)}
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+    <hr />
 
-                              {message && (
-                                <div className="message-box mb-3">
-                                  <div className="text-end">
-                                    <OverlayTrigger
-                                      placement="top"
-                                      overlay={removeCouping}
-                                    >
-                                      <Link className="icon" to="#">
-                                        <IoIosCloseCircleOutline
-                                          onClick={removeCoupon}
-                                          style={{
-                                            color: "#ff0000",
-                                            fontSize: "25px",
-                                            cursor: "pointer",
-                                          }}
-                                        />
-                                      </Link>
-                                    </OverlayTrigger>
-                                  </div>
-                                  <span>
-                                    You are now eligible for a base
-                                    discount&nbsp;
-                                    <b>
-                                      {code.discount_type === "percentage" ? (
-                                        <>({code.discount_value}%)</>
-                                      ) : (
-                                        <>₹({code.discount_value})</>
-                                      )}
-                                    </b>
-                                    &nbsp;off on making charges.
-                                  </span>
-                                </div>
-                              )}
+    {message && (
+      <div className="message-box mb-3">
+        <div className="text-end">
+          <OverlayTrigger
+            placement="top"
+            overlay={removeCouping}
+          >
+            <Link className="icon" to="#">
+              <IoIosCloseCircleOutline
+                onClick={removeCoupon}
+                style={{
+                  color: "#ff0000",
+                  fontSize: "25px",
+                  cursor: "pointer",
+                }}
+              />
+            </Link>
+          </OverlayTrigger>
+        </div>
+        <span>
+          You are now eligible for a base discount&nbsp;
+          <b>
+            {code.discount_type === "percentage" ? (
+              <>({code.discount_value}%)</>
+            ) : (
+              <>₹({code.discount_value})</>
+            )}
+          </b>
+          &nbsp;off on making charges.
+        </span>
+      </div>
+    )}
                               <div>
                                 <form onSubmit={ApplyPincode}>
-                                  <div className="form-group">
+                                  {/* <div className="form-group">
                                     <div className="input-group">
                                       <input
                                         type="number"
@@ -1350,12 +1366,10 @@ const ReadyDesignCart = () => {
                                         {pin_code_msg}
                                       </span>
                                     )}
-                                  </div>
+                                  </div> */}
                                 </form>
                               </div>
-                              {pin_code_valid === true && (
                                 <>
-                                  <hr />
                                   <div className="mt-2">
                                     <label htmlFor="Payment Method">
                                       Payment Method :
@@ -1416,7 +1430,6 @@ const ReadyDesignCart = () => {
                                     </button>
                                   </div>
                                 </>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -1751,21 +1764,21 @@ const ReadyDesignCart = () => {
                           <Form.Label>
                             Shipping City<span className="text-danger">*</span>
                           </Form.Label>
-                          <select
-                            className="form-control"
-                            name="shipping_city"
-                            onChange={(e) => {
-                              handleChange(e);
-                            }}
-                            value={userData.shipping_city}
-                          >
-                            <option value="">--shipping City select--</option>
-                            {shipping_city?.map((usercity, index) => (
-                              <option key={index} value={usercity?.id}>
-                                {usercity?.name}
-                              </option>
-                            ))}
-                          </select>
+                         <select
+  className="form-control"
+  name="shipping_city"
+  onChange={(e) => {
+    handleChange(e);
+  }}
+  value={userData.shipping_city} 
+>
+  <option value="">--shipping City select--</option>
+  {shipping_city?.map((usercity, index) => (
+    <option key={index} value={usercity?.id}>
+      {usercity?.name}
+    </option>
+  ))}
+</select>
                           <span className="text-danger">
                             {error.shipping_city_err}
                           </span>

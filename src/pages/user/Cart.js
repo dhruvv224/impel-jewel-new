@@ -148,46 +148,53 @@ const Cart = () => {
   };
 
   const getProfile = async () => {
-    await profileService
-      .getProfile({ phone: Phone })
-      .then((res) => {
-        const Billing_shipping_state = res.data.state.name;
-        const Billing_shipping_city = res.data.city.name;
-        const shipping_state_name = res.data.shipping_state.name;
-        const shipping_city_name = res.data.shipping_city.name;
-        setProfileData({
-          ...res.data,
-          state_name: Billing_shipping_state,
-          city_name: Billing_shipping_city,
-          shipping_state_name: shipping_state_name,
-          shipping_city_name: shipping_city_name,
-          state: res.data.state.id,
-          city: res.data.city.id,
-          shipping_state: res.data.shipping_state.id,
-          shipping_city: res.data.shipping_city.id,
-        });
-        setUserData({
-          ...res.data,
-          state_name: Billing_shipping_state,
-          city_name: Billing_shipping_city,
-          shipping_state_name: shipping_state_name,
-          shipping_city_name: shipping_city_name,
-          state: res.data.state.id,
-          city: res.data.city.id,
-          shipping_state: res.data.shipping_state.id,
-          shipping_city: res.data.shipping_city.id,
-        });
-        res.data.state.id && fetchCity(res.data.state.id);
-        res.data.shipping_state.id &&
-          fetchShippingCity(res.data.shipping_state.id);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setIsLoading(false);
+  await profileService
+    .getProfile({ phone: Phone })
+    .then((res) => {
+      const Billing_shipping_state = res.data.state.name;
+      const Billing_shipping_city = res.data.city.name;
+      const shipping_state_name = res.data.shipping_state.name;
+      const shipping_city_name = res.data.shipping_city.name;
+      
+      setProfileData({
+        ...res.data,
+        state_name: Billing_shipping_state,
+        city_name: Billing_shipping_city,
+        shipping_state_name: shipping_state_name,
+        shipping_city_name: shipping_city_name,
+        state: res.data.state.id,        // State ID
+        city: res.data.city.id,           // City ID
+        shipping_state: res.data.shipping_state.id,  // Shipping state ID
+        shipping_city: res.data.shipping_city.id,    // Shipping city ID
       });
-  };
-
+      
+      setUserData({
+        ...res.data,
+        state_name: Billing_shipping_state,
+        city_name: Billing_shipping_city,
+        shipping_state_name: shipping_state_name,
+        shipping_city_name: shipping_city_name,
+        state: res.data.state.id,        // State ID
+        city: res.data.city.id,           // City ID
+        shipping_state: res.data.shipping_state.id,  // Shipping state ID
+        shipping_city: res.data.shipping_city.id,    // Shipping city ID
+      });
+      
+      res.data.state.id && fetchCity(res.data.state.id);
+      res.data.shipping_state.id &&
+        fetchShippingCity(res.data.shipping_state.id);
+      setIsLoading(false);
+    })
+    .catch((err) => {
+      console.log(err);
+      setIsLoading(false);
+    });
+};
+useEffect(() => {
+  if (userData.shipping_state) {
+    fetchShippingCity(userData.shipping_state);
+  }
+}, [userData.shipping_state]);
   const handleProfileData = async (data) => {
     setSelectedData(data);
   };
@@ -220,27 +227,33 @@ const Cart = () => {
   };
 
   const handleCheckboxChange = (event) => {
-    setIsChecked(event.target.checked);
+  setIsChecked(event.target.checked);
 
-    if (event.target.checked) {
-      setUserData({
-        ...userData,
-        shipping_address: userData.address,
-        shipping_pincode: userData.pincode,
-        shipping_state: userData.state,
-        shipping_city: userData.city,
-      });
-    } else {
-      setUserData({
-        ...userData,
-        shipping_address: "",
-        shipping_pincode: "",
-        shipping_state: "",
-        shipping_city: "",
-      });
+  if (event.target.checked) {
+    const updatedUserData = {
+      ...userData,
+      shipping_address: userData.address,
+      shipping_pincode: userData.pincode,
+      shipping_state: userData.state,
+      shipping_city: userData.city,
+    };
+    
+    setUserData(updatedUserData);
+    
+    // Fetch shipping cities for the selected state
+    if (userData.state) {
+      fetchShippingCity(userData.state);
     }
-  };
-
+  } else {
+    setUserData({
+      ...userData,
+      shipping_address: "",
+      shipping_pincode: "",
+      shipping_state: "",
+      shipping_city: "",
+    });
+  }
+};
   // SUB TOTAL
   const SubAmount = () => {
     let subTotal = 0;
@@ -822,7 +835,19 @@ const Cart = () => {
   const handleClose = () => {
     setShowEdit(false);
   };
-
+const DiscountAmount = () => {
+  if (code?.discount_value) {
+    if (code?.discount_type === "percentage") {
+      return (SubCharge() * code.discount_value) / 100;
+    } else {
+      return code.discount_value;
+    }
+  }
+  return 0;
+};
+const SubTotalAfterDiscount = () => {
+  return SubAmount() - DiscountAmount();
+};
   return (
     <>
       <Helmet>
@@ -1006,14 +1031,33 @@ const Cart = () => {
                             <div className="card shadow-0 border">
                               <div className="card-body">
                                 {/* SUB TOTAL :*/}
-                                <div className="d-flex justify-content-between">
-                                  <p className="mb-2">Sub total :</p>
-                                  <p className="mb-2 fw-bold">
-                                    ₹{numberFormat(SubAmount())}
-                                  </p>
-                                </div>
+                              <div className="d-flex justify-content-between">
+      <p className="mb-2">Price :</p>
+      <p className="mb-2 fw-bold">
+        ₹{numberFormat(SubAmount())}
+      </p>
+    </div>
                                 <hr />
-
+  {message && code?.discount_value && (
+      <>
+        <div className="d-flex justify-content-between">
+          <p className="mb-2 text-success">Discount :</p>
+          <p className="mb-2 fw-bold text-success">
+            - ₹{numberFormat(DiscountAmount())}
+          </p>
+        </div>
+        <hr />
+        
+        {/* SUBTOTAL AFTER DISCOUNT */}
+        <div className="d-flex justify-content-between">
+          <p className="mb-2">Subtotal  :</p>
+          <p className="mb-2 fw-bold">
+            ₹{numberFormat(SubTotalAfterDiscount())}
+          </p>
+        </div>
+        <hr />
+      </>
+    )}
                                 {/* GST TOTAL :*/}
                                 <div className="d-flex justify-content-between">
                                   <p className="mb-2">GST (3%)</p>
@@ -1060,23 +1104,7 @@ const Cart = () => {
                                 </div>
                                 <hr />
 
-                                {message && (
-                                  <>
-                                    <div className="d-flex justify-content-between">
-                                      <p className="mb-2 fw-bold text-success">
-                                        Discount :
-                                      </p>
-                                      <p className="mb-2 fw-bold text-success">
-                                        - ₹
-                                        {numberFormat(
-                                          (SubCharge() * code.discount_value) /
-                                            100
-                                        )}
-                                      </p>
-                                    </div>
-                                    <hr />
-                                  </>
-                                )}
+                               
 
                                 {message && (
                                   <div className="message-box mb-3">
@@ -1117,7 +1145,7 @@ const Cart = () => {
                                   </button>
                                 </div> */}
                                 <div>
-                                  <form onSubmit={ApplyPincode}>
+                                  {/* <form onSubmit={ApplyPincode}>
                                     <div className="form-group">
                                       <div className="input-group">
                                         <input
@@ -1167,10 +1195,9 @@ const Cart = () => {
                                         </span>
                                       )}
                                     </div>
-                                  </form>
+                                  </form> */}
                                 </div>
 
-                                {pin_code_valid === true && (
                                   <>
                                     <div className="pt-2">
                                       <button
@@ -1199,7 +1226,6 @@ const Cart = () => {
                                       </button>
                                     </div>
                                   </>
-                                )}
                               </div>
                             </div>
                           </div>
@@ -1548,21 +1574,21 @@ const Cart = () => {
                               Shipping City
                               <span className="text-danger">*</span>
                             </Form.Label>
-                            <select
-                              className="form-control"
-                              name="shipping_city"
-                              onChange={(e) => {
-                                handleChange(e);
-                              }}
-                              value={userData.shipping_city}
-                            >
-                              <option value="">--shipping City select--</option>
-                              {shipping_city?.map((usercity, index) => (
-                                <option key={index} value={usercity?.id}>
-                                  {usercity?.name}
-                                </option>
-                              ))}
-                            </select>
+                           <select
+  className="form-control"
+  name="shipping_city"
+  onChange={(e) => {
+    handleChange(e);
+  }}
+  value={userData.shipping_city} 
+>
+  <option value="">--shipping City select--</option>
+  {shipping_city?.map((usercity, index) => (
+    <option key={index} value={usercity?.id}> 
+      {usercity?.name}
+    </option>
+  ))}
+</select>
                             <span className="text-danger">
                               {error.shipping_city_err}
                             </span>

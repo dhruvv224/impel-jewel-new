@@ -21,22 +21,22 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [spinner, setSpinner] = useState(false);
   const [userData, setUserData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    pincode: "",
-    shipping_address: "",
-    shipping_pincode: "",
-    shipping_state: "",
-    shipping__city: "",
-    gst_no: "",
-    pan_no: "",
-    state: "",
-    city: "",
-    states: "",
-    address_same_as_company: "",
-  });
+  name: "",
+  email: "",
+  phone: "",
+  address: "",
+  pincode: "",
+  shipping_address: "",
+  shipping_pincode: "",
+  shipping_state: "",
+  shipping_city: "", // Change to single underscore
+  gst_no: "",
+  pan_no: "",
+  state: "",
+  city: "",
+  states: "",
+  address_same_as_company: "",
+});
 
   const [error, setError] = useState({
     nameErr: "",
@@ -111,70 +111,83 @@ const Profile = () => {
     }
   };
 
-  const handleCheckboxChange = (event) => {
-    setIsChecked(event.target.checked);
+ const handleCheckboxChange = (event) => {
+  setIsChecked(event.target.checked);
 
-    if (event.target.checked) {
-      setUserData({
-        ...userData,
-        shipping_address: userData.address,
-        shipping_pincode: userData.pincode,
-        shipping_state: userData.state,
-        shipping__city: userData.city,
-      });
-    } else {
-      setUserData({
-        ...userData,
-        shipping_address: "",
-        shipping_pincode: "",
-        shipping_state: "",
-        shipping__city: "",
-      });
+  if (event.target.checked) {
+    const updatedUserData = {
+      ...userData,
+      shipping_address: userData.address,
+      shipping_pincode: userData.pincode,
+      shipping_state: userData.state,
+      shipping_city: userData.city,
+    };
+    
+    setUserData(updatedUserData);
+    
+    // Fetch shipping cities for the selected state
+    if (userData.state) {
+      fetchShippingCity(userData.state);
     }
-  };
-
+  } else {
+    setUserData({
+      ...userData,
+      shipping_address: "",
+      shipping_pincode: "",
+      shipping_state: "",
+      shipping_city: "",
+    });
+  }
+};
   // user profile display function
-  const getProfile = async () => {
-    await profileService
-      .getProfile({ phone: phone })
-      .then((res) => {
-        const stateName = res.data.state.name;
-        const cityName = res.data.city.name;
-        const shippingStateName = res.data.shipping_state.name;
-        const shippingCityName = res.data.shipping_city.name;
-        setProfileData({
-          ...res.data,
-          state_name: stateName,
-          city_name: cityName,
-          shipping_state_name: shippingStateName,
-          shipping_city_name: shippingCityName,
-          state: res.data.state.id,
-          city: res.data.city.id,
-          shipping_state: res.data.shipping_state.id,
-          shipping_city: res.data.shipping_city.id,
-        });
-        setUserData({
-          ...res.data,
-          state_name: stateName,
-          city_name: cityName,
-          shipping_state_name: shippingStateName,
-          shipping_city_name: shippingCityName,
-          state: res.data.state.id,
-          city: res.data.city.id,
-          shipping_state: res.data.shipping_state.id,
-          shipping__city: res.data.shipping_city.id,
-        });
-        res.data.state.id && fetchCity(res.data.state.id);
-        res.data.shipping_state.id &&
-          fetchShippingCity(res.data.shipping_state.id);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setIsLoading(false);
+ const getProfile = async () => {
+  await profileService
+    .getProfile({ phone: phone })
+    .then((res) => {
+      const Billing_shipping_state = res.data.state.name;
+      const Billing_shipping_city = res.data.city.name;
+      const shipping_state_name = res.data.shipping_state.name;
+      const shipping_city_name = res.data.shipping_city.name;
+      
+      setProfileData({
+        ...res.data,
+        state_name: Billing_shipping_state,
+        city_name: Billing_shipping_city,
+        shipping_state_name: shipping_state_name,
+        shipping_city_name: shipping_city_name,
+        state: res.data.state.id,        // State ID
+        city: res.data.city.id,           // City ID
+        shipping_state: res.data.shipping_state.id,  // Shipping state ID
+        shipping_city: res.data.shipping_city.id,    // Shipping city ID
       });
-  };
-
+      
+      setUserData({
+        ...res.data,
+        state_name: Billing_shipping_state,
+        city_name: Billing_shipping_city,
+        shipping_state_name: shipping_state_name,
+        shipping_city_name: shipping_city_name,
+        state: res.data.state.id,        // State ID
+        city: res.data.city.id,           // City ID
+        shipping_state: res.data.shipping_state.id,  // Shipping state ID
+        shipping_city: res.data.shipping_city.id,    // Shipping city ID
+      });
+      
+      res.data.state.id && fetchCity(res.data.state.id);
+      res.data.shipping_state.id &&
+        fetchShippingCity(res.data.shipping_state.id);
+      setIsLoading(false);
+    })
+    .catch((err) => {
+      console.log(err);
+      setIsLoading(false);
+    });
+};
+useEffect(() => {
+  if (userData.shipping_state) {
+    fetchShippingCity(userData.shipping_state);
+  }
+}, [userData.shipping_state]);
   const fetchCity = async (stateId) => {
     await profileService
       .getCity({ state_id: stateId })
@@ -214,7 +227,7 @@ const Profile = () => {
       setUserData({
         ...userData,
         shipping_state: value,
-        shipping__city: "",
+        shipping_city: "",
       });
     } else {
       setUserData({
@@ -328,7 +341,7 @@ const Profile = () => {
         validationErrors.shipping_state_err = "";
       }
 
-      if (!userData.shipping__city || userData.shipping__city === "") {
+      if (!userData.shipping_city || userData.shipping_city === "") {
         validationErrors.shipping_city_err = "Shipping city must be selected";
         isValid = false;
       } else {
@@ -382,7 +395,7 @@ const Profile = () => {
       );
       formData.append(
         "shipping_city",
-        isChecked ? userData.city : userData.shipping__city
+        isChecked ? userData.city : userData.shipping_city
       );
 
       profileService
@@ -826,21 +839,21 @@ const Profile = () => {
                     <Form.Label>
                       Shipping City<span className="text-danger">*</span>
                     </Form.Label>
-                    <select
-                      className="form-control"
-                      name="shipping__city"
-                      onChange={(e) => {
-                        handleEditChange(e);
-                      }}
-                      value={userData.shipping__city}
-                    >
-                      <option value="">--shipping City select--</option>
-                      {shipping_city?.map((usercity, index) => (
-                        <option key={index} value={usercity?.id}>
-                          {usercity?.name}
-                        </option>
-                      ))}
-                    </select>
+                   <select
+  className="form-control"
+  name="shipping_city" // Change to single underscore
+  onChange={(e) => {
+    handleEditChange(e);
+  }}
+  value={userData.shipping_city} // Change to single underscore
+>
+  <option value="">--shipping City select--</option>
+  {shipping_city?.map((usercity, index) => (
+    <option key={index} value={usercity?.id}>
+      {usercity?.name}
+    </option>
+  ))}
+</select>
                     <span className="text-danger">
                       {error.shipping_city_err}
                     </span>
