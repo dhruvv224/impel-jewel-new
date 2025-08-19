@@ -680,7 +680,6 @@ const ReadyDesignCart = () => {
     states: "",
     address_same_as_company: "",
   });
-console.log(userData, "userData");
   const [error, setError] = useState({
     nameErr: "",
     emailErr: "",
@@ -706,7 +705,6 @@ console.log(userData, "userData");
         console.log(err);
       });
   };
-console.log(city,":")
   const fetchShippingCity = async (cityId) => {
     await profileService
       .getCity({ state_id: cityId })
