@@ -1,0 +1,36 @@
+{
+  "files": {
+    "main.css": "/static/css/main.ca4b45e0.css",
+    "main.js": "/static/js/main.ab36ebd9.js",
+    "static/js/453.258b012d.chunk.js": "/static/js/453.258b012d.chunk.js",
+    "static/media/DSC00928.JPG": "/static/media/DSC00928.ba73431c34a89034ae27.JPG",
+    "static/media/DSC00910.JPG": "/static/media/DSC00910.2adabec0e79a1b3e3fc9.JPG",
+    "static/media/impel-bird-unscreen.gif": "/static/media/impel-bird-unscreen.6a73585a4d5183f7a00c.gif",
+    "static/media/Lato-Regular.ttf": "/static/media/Lato-Regular.80c07943565d91b976e1.ttf",
+    "static/media/Impel_banner.jpg": "/static/media/Impel_banner.9fc31e1c279affc49e42.jpg",
+    "static/media/bg-01.jpeg": "/static/media/bg-01.bf8cd203a9c6445ff403.jpeg",
+    "static/media/banner-3.JPEG": "/static/media/banner-3.c2bca4fac4ebcd4e8a08.JPEG",
+    "static/media/jewelery-logo-removebg-preview.png": "/static/media/jewelery-logo-removebg-preview.3f2e024afce8e613e3e4.png",
+    "static/media/404-page-removebg-preview.png": "/static/media/404-page-removebg-preview.d28480e3cf7109dd1f98.png",
+    "static/media/Earring.jpg": "/static/media/Earring.7691fd25c5f076ac7824.jpg",
+    "static/media/Necklace.jpg": "/static/media/Necklace.cf00c0aae07f230a10f1.jpg",
+    "static/media/kada.jpg": "/static/media/kada.b79ea5404bef4b5f77f5.jpg",
+    "static/media/Bracelet.jpg": "/static/media/Bracelet.f182bcb58d59bf018bbd.jpg",
+    "static/media/Gold Bracelet.jpg": "/static/media/Gold Bracelet.acfdd66bff20fd9936c2.jpg",
+    "static/media/Rings.jpg": "/static/media/Rings.508b16376c35ba71dedf.jpg",
+    "static/media/Silver Bracelet.jpg": "/static/media/Silver Bracelet.59c2c3c72c81f9855c6e.jpg",
+    "static/media/Rings_1.jpg": "/static/media/Rings_1.cb9d9f2b9171f0397496.jpg",
+    "static/media/logo.png": "/static/media/logo.4b7825a638146a1cdf28.png",
+    "static/media/empty-cart.png": "/static/media/empty-cart.30d130f69377623f0ef9.png",
+    "static/media/No_Image_Available.jpg": "/static/media/No_Image_Available.e1ce751ef1b590f719f9.jpg",
+    "static/media/engagement-ring_7354745.png": "/static/media/engagement-ring_7354745.735009e1e7c1f1e77280.png",
+    "index.html": "/index.html",
+    "main.ca4b45e0.css.map": "/static/css/main.ca4b45e0.css.map",
+    "main.ab36ebd9.js.map": "/static/js/main.ab36ebd9.js.map",
+    "453.258b012d.chunk.js.map": "/static/js/453.258b012d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ca4b45e0.css",
+    "static/js/main.ab36ebd9.js"
+  ]
+}

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BsSearch } from "react-icons/bs";
 import { FiHeart } from "react-icons/fi";
@@ -26,13 +26,22 @@ import UserWishlist from "../../services/Auth";
 import { WishlistSystem } from "../../context/WishListContext";
 import { motion } from "framer-motion";
 
+// Custom debounce function
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+};
+
 const Shop = () => {
   const { dispatch: wishlistDispatch } = useContext(WishlistSystem);
   const { dispatch: removeWishlistDispatch } = useContext(WishlistSystem);
 
   const location = useLocation();
   const navigate = useNavigate();
-    const { tag_id } = location.state || {};
+  const { tag_id } = location.state || {};
 
   const userType = localStorage.getItem("user_type");
   const userId = localStorage.getItem("user_id");
@@ -87,23 +96,31 @@ const Shop = () => {
     { value: "highest_selling", label: "Top Seller" },
   ]);
 
+  // Debounced search handler
+  const debouncedSearch = useCallback(
+    debounce((searchedText) => {
+      setIsLoading(true);
+      const queryParams = new URLSearchParams(location.search);
+      if (searchedText?.length > 0) {
+        queryParams.delete("page");
+        queryParams.set("search", searchedText);
+        setPagination((prev) => ({ ...prev, currentPage: 1 }));
+      } else {
+        queryParams.delete("search");
+      }
+      navigate(
+        `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+          queryParams.toString() ? `?${queryParams.toString()}` : ""
+        }`
+      );
+    }, 500), // 500ms debounce delay
+    [location.search, tagNameFromUrl, navigate]
+  );
+
   const searchbar = (e) => {
-    setIsLoading(true);
     const searchedText = e.target.value.toUpperCase();
     setSearchInput(searchedText);
-    const queryParams = new URLSearchParams(location.search);
-    if (searchedText?.length > 0) {
-      queryParams.delete("page");
-      queryParams.set("search", searchedText);
-      setPagination((prev) => ({ ...prev, currentPage: 1 }));
-    } else {
-      queryParams.delete("search");
-    }
-    navigate(
-      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
-        queryParams.toString() ? `?${queryParams.toString()}` : ""
-      }`
-    );
+    debouncedSearch(searchedText);
   };
 
   const handleSelectCategory = (categoryId) => {
