@@ -33,7 +33,7 @@ const Popup = () => {
   };
 
   const handleLogin = () => {
-    navigate("/login");
+navigate('/login', { state: { from: location.pathname } });
     handleClose();
   };
 

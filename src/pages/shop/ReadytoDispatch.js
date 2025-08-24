@@ -28,7 +28,6 @@ const debounce = (func, wait) => {
 const ReadytoDispatch = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const debounceTimeout = useRef(null);
 
   const JewelleryType = [
     { id: "4", name: "Silver" },
@@ -61,23 +60,23 @@ const ReadytoDispatch = () => {
   const totalPages = Math.ceil(totalItems / pagination.dataShowLength);
 
   // Centralized debounced function to update URL and fetch data
-  const debouncedUpdate = useCallback(
-    debounce((queryParams, newState) => {
-      setIsLoading(true);
-      navigate(`/ready-to-dispatch${queryParams ? `?${queryParams.toString()}` : ""}`);
-      setPagination((prev) => ({ ...prev, currentPage: 1 }));
-      Object.keys(newState).forEach((key) => {
-        if (key === "tagNoChange") setTagNoChange(newState[key]);
-        if (key === "companyId") setCompanyId(newState[key]);
-        if (key === "selectedSizes") setSelectedSizes(newState[key]);
-        if (key === "selectedItemGroups") setSelectedItemGroups(newState[key]);
-        if (key === "selectedItems") setSelectedItems(newState[key]);
-        if (key === "selectedSubItems") setSelectedSubItems(newState[key]);
-        if (key === "selectedStyles") setSelectedStyles(newState[key]);
-      });
-    }, 500),
-    [navigate]
-  );
+const debouncedUpdate = useCallback(
+  debounce((queryParams, newState) => {
+    setIsLoading(true);
+    navigate(`/ready-to-dispatch${queryParams ? `?${queryParams.toString()}` : ""}`);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    Object.keys(newState).forEach((key) => {
+      if (key === "tagNoChange") setTagNoChange(newState[key] || null); // Ensure null when empty
+      if (key === "companyId") setCompanyId(newState[key]);
+      if (key === "selectedSizes") setSelectedSizes(newState[key]);
+      if (key === "selectedItemGroups") setSelectedItemGroups(newState[key]);
+      if (key === "selectedItems") setSelectedItems(newState[key]);
+      if (key === "selectedSubItems") setSelectedSubItems(newState[key]);
+      if (key === "selectedStyles") setSelectedStyles(newState[key]);
+    });
+  }, 500),
+  [navigate]
+);
 
   // Generic handler for filter changes
   const handleFilterChange = (key, selectedOption, paramName) => {
@@ -92,17 +91,20 @@ const ReadytoDispatch = () => {
   };
 
   // Specific filter handlers
-  const handleSearchItems = useCallback((e) => {
-    const searchedText = e.target.value.toUpperCase();
+  const handleSearchItems = useCallback(
+  (e) => {
+    const searchedText = e.target.value; // Keep the raw input for display
     const queryParams = new URLSearchParams(location.search);
     queryParams.delete("page");
     if (searchedText.length > 0) {
-      queryParams.set("search", searchedText);
+      queryParams.set("search", searchedText.toUpperCase()); // Convert to uppercase for API
     } else {
       queryParams.delete("search");
     }
-    debouncedUpdate(queryParams, { tagNoChange: searchedText });
-  }, [debouncedUpdate]);
+    debouncedUpdate(queryParams, { tagNoChange: searchedText || null });
+  },
+  [debouncedUpdate]
+);
 
   const handleItems = (selectedOption) => handleFilterChange("selectedItems", selectedOption, "items");
   const handleSubItems = (selectedOption) => handleFilterChange("selectedSubItems", selectedOption, "sub-items");
@@ -279,17 +281,6 @@ const ReadytoDispatch = () => {
     }
   };
 
-  // Fetch product prices and PDF list
-  useEffect(() => {
-    const fetchProductPrices = async () => {
-      try {
-        const res = await profileService.GetProductsPrices();
-        setAllPrices(res?.data || []);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     const fetchPdfList = async () => {
       try {
         const res = await DealerPdf.readyPdfList({ email });
@@ -298,11 +289,21 @@ const ReadytoDispatch = () => {
         console.error(err);
       }
     };
+  // Fetch product prices and PDF list
+  useEffect(() => {
+  const fetchProductPrices = async () => {
+    try {
+      const res = await profileService.GetProductsPrices();
+      setAllPrices(res?.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    fetchProductPrices();
-    if (email) fetchPdfList();
-    fetchMasterGroups();
-  }, [email]);
+  fetchProductPrices();
+  if (email) fetchPdfList();
+  fetchMasterGroups();
+}, [email, fetchPdfList]);
 
   // Fetch products and filters on location change
   useEffect(() => {
@@ -310,13 +311,7 @@ const ReadytoDispatch = () => {
   }, [location.search, getProductsFilterAndData]);
 
   // Clean up debounce timeout on component unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-    };
-  }, []);
+
 
   // Pagination handlers
   const updatePagination = (page) => {

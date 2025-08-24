@@ -14,7 +14,7 @@ import { Accordion } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { motion } from "framer-motion";
-
+import { usePreviousPath } from "../../utils/Trackprevroute";
 import easyReturn from "../../assets/images/Tags/Warranty.png";
 import plating from "../../assets/images/Tags/Jewellery.png";
 import auth925 from "../../assets/images/Tags/Auth925.png";
@@ -25,9 +25,12 @@ const api = process.env.REACT_APP_API_KEY;
 const ReadyDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
+    const prevPath = usePreviousPath();
+
   const phone = localStorage.getItem("phone");
   const { id } = useParams();
   const user_id = localStorage.getItem("user_id");
+const loginPath = sessionStorage.getItem("currentPath");
 
   const { dispatch: addtocartDispatch } = useContext(ReadyDesignCartSystem);
 
@@ -204,9 +207,18 @@ const ReadyDetails = () => {
   const UserLogin = (e) => {
     e.preventDefault();
     localStorage.setItem("redirectPath", location.pathname);
-    navigate("/login");
+navigate('/login', { state: { from: location.pathname } });
   };
-
+  const handleBackClick = () => {
+    // Check the previous page's path
+    console.log(loginPath,"::prev page")
+    // If coming from login page, redirect to /shop
+    if (loginPath?.includes('/login')) {
+      navigate('/shop');
+    } else {
+      navigate(-1); // Go back normally
+    }
+  };
   return (
     <>
       <Helmet>
@@ -489,10 +501,10 @@ const ReadyDetails = () => {
       <button
         className="btn btn-outline-dark px-4 d-flex align-items-center"
         style={{ borderRadius: "8px" }}
-        onClick={() => navigate(-1)}
+      onClick={handleBackClick}
       >
         <FaLongArrowAltLeft className="me-2" size={18} />
-        Back to Shop
+        Back to Shop 
       </button>
     </>
   ) : (
@@ -508,7 +520,7 @@ const ReadyDetails = () => {
       <button
         className="btn btn-outline-dark px-4 d-flex align-items-center"
         style={{ borderRadius: "8px" }}
-        onClick={() => navigate(-1)}
+      onClick={handleBackClick}
       >
         <FaLongArrowAltLeft className="me-2" size={18} />
         Back to Shop

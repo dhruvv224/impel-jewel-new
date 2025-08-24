@@ -1,7 +1,7 @@
 
 
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import OTPInput from "otp-input-react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
@@ -13,6 +13,7 @@ import profileService from "../../services/Auth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location=useLocation()
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [show, setShow] = useState(false);
@@ -49,7 +50,7 @@ const Login = () => {
         .then((res) => {
           if (res?.data?.status === 0) {
             toast.error(res?.data?.message);
-            navigate("/login");
+navigate('/login', { state: { from: location.pathname } });
             return;
           } else {
             profileService
@@ -116,7 +117,10 @@ const Login = () => {
   };
 
   const PhoneNumber = phoneNumber.replace("91", "");
-
+useEffect(() => {
+  // Store the current path in sessionStorage
+  sessionStorage.setItem("currentPath", location.pathname);
+}, [location.pathname]);
   return (
     <>
       <Helmet>

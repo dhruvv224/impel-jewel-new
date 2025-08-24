@@ -196,7 +196,7 @@ const Navbar = () => {
       localStorage.removeItem("savedDiscount");
       localStorage.removeItem("message");
       localStorage.removeItem("isChecked");
-      navigate("/login");
+      navigate('/login', { state: { from: location.pathname } });
     }
   };
 

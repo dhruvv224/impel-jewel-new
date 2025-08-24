@@ -36,6 +36,7 @@ const ShopDetails = () => {
   const { dispatch: wishlistDispatch } = useContext(WishlistSystem);
   const { dispatch: removeWishlistDispatch } = useContext(WishlistSystem);
   const { dispatch: addtocartDispatch } = useContext(CartSystem);
+const loginPath = sessionStorage.getItem("currentPath");
 
   const { id } = useParams();
   const { id: categoryIdFromState, name: categoryNameFromState } = location.state || {};
@@ -231,12 +232,21 @@ const ShopDetails = () => {
   const UserLogin = (e) => {
     e.preventDefault();
     localStorage.setItem("redirectPath", location.pathname);
-    navigate("/login");
+navigate('/login', { state: { from: location.pathname } });
   };
 
   const numberFormat = (value) =>
     new Intl.NumberFormat("en-IN")?.format(Math?.round(value));
-
+  const handleBackClick = () => {
+    // Check the previous page's path
+    console.log(loginPath,"::prev page")
+    // If coming from login page, redirect to /shop
+    if (loginPath?.includes('/login')) {
+      navigate('/shop');
+    } else {
+      navigate(-1); // Go back normally
+    }
+  };
   return (
     <>
       <Helmet>
@@ -1072,72 +1082,74 @@ const ShopDetails = () => {
                               </div>
                             )}
                           </div>
-                       <div className="d-flex justify-content-between align-items-center pt-2">
-  {/* Left side: Add to Cart / Wishlist */}
-  <div className="d-flex align-items-center gap-2">
-    {Phone ? (
-      <>
-        {cartItems?.find((item) => item?.design_id === product?.id) ? (
-          <Link className="btn btn-outline-dark" to="/cart">
-            <BsCartDash style={{ fontSize: "26px", cursor: "pointer" }} />
-          </Link>
-        ) : (
-          <>
-            <button
-              className="btn btn-outline-dark"
-              onClick={() => handleAddToCart(product)}
-              disabled={spinner}
-            >
-              {spinner ? (
-                <CgSpinner size={20} className="animate_spin" />
-              ) : (
-                <BsHandbagFill style={{ fontSize: "26px", cursor: "pointer" }} />
-              )}
-            </button>
+                       <div className="d-flex align-items-center gap-2 pt-2">
+  {Phone ? (
+    <>
+      {cartItems?.find((item) => item?.design_id === product?.id) ? (
+        <Link className="btn btn-outline-dark" to="/cart">
+          <BsCartDash style={{ fontSize: "26px", cursor: "pointer" }} />
+        </Link>
+      ) : (
+        <>
+          <button
+            className="btn btn-outline-dark"
+            onClick={() => handleAddToCart(product)}
+            disabled={spinner}
+          >
+            {spinner ? (
+              <CgSpinner size={20} className="animate_spin" />
+            ) : (
+              <BsHandbagFill style={{ fontSize: "26px", cursor: "pointer" }} />
+            )}
+          </button>
 
-            <button
-              className="btn btn-outline-dark"
-              onClick={() => addToUserWishList(product)}
-              disabled={UserWishlistItems?.some(
-                (item) => item?.id === product?.id
-              )}
-            >
-              {UserWishlistItems?.some((item) => item?.id === product?.id) ? (
-                <FaHeart style={{ fontSize: "26px", cursor: "pointer", color: "green" }} />
-              ) : spinner2 ? (
-                <CgSpinner size={20} className="animate_spin" />
-              ) : (
-                <FaRegHeart style={{ fontSize: "26px", cursor: "pointer" }} />
-              )}
-            </button>
-          </>
-        )}
-      </>
-    ) : Dealer ? (
-      <></>
-    ) : (
-      <div className="d-flex align-items-center gap-2" onClick={(e) => UserLogin(e)}>
-        <span className="btn btn-outline-dark">
-          <BsHandbagFill style={{ fontSize: "26px", cursor: "pointer" }} />
-        </span>
-        <span className="btn btn-outline-dark">
-          <FaRegHeart style={{ fontSize: "26px", cursor: "pointer" }} />
-        </span>
-      </div>
-    )}
-  </div>
+          <button
+            className="btn btn-outline-dark"
+            onClick={() => addToUserWishList(product)}
+            disabled={UserWishlistItems?.some(
+              (item) => item?.id === product?.id
+            )}
+          >
+            {UserWishlistItems?.some((item) => item?.id === product?.id) ? (
+              <FaHeart
+                style={{ fontSize: "26px", cursor: "pointer", color: "green" }}
+              />
+            ) : spinner2 ? (
+              <CgSpinner size={20} className="animate_spin" />
+            ) : (
+              <FaRegHeart style={{ fontSize: "26px", cursor: "pointer" }} />
+            )}
+          </button>
+        </>
+      )}
+    </>
+  ) : Dealer ? (
+    <></>
+  ) : (
+    <div
+      className="d-flex align-items-center gap-2"
+      onClick={(e) => UserLogin(e)}
+    >
+      <span className="btn btn-outline-dark">
+        <BsHandbagFill style={{ fontSize: "26px", cursor: "pointer" }} />
+      </span>
+      <span className="btn btn-outline-dark">
+        <FaRegHeart style={{ fontSize: "26px", cursor: "pointer" }} />
+      </span>
+    </div>
+  )}
 
-  {/* Right side: Back to Shop */}
-  <div>
-  <button
-    className="btn btn-outline-dark px-4"
-    style={{ borderRadius: "8px" }}
-    onClick={() => navigate(-1)} 
-  >
-    <FaLongArrowAltLeft className="mr-2" /> Back To Shop
-  </button>
+  {/* Back to shop inline with others */}
+   <button
+          className="btn btn-outline-dark px-4 d-flex align-items-center"
+          style={{ borderRadius: "8px" }}
+        onClick={handleBackClick}
+        >
+          <FaLongArrowAltLeft className="me-2" size={18} />
+          Back to Shop 
+        </button>
 </div>
-</div>
+
 
 
                          

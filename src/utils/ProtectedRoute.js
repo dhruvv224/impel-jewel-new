@@ -18,7 +18,7 @@ const ProtectedRoute = (props) => {
   const checkUser = () => {
     if (!userPhone) {
       setIsLoggedIn(false);
-      return navigate("/login");
+      return navigate('/login', { state: { from: location.pathname } });
     }
     setIsLoggedIn(true);
   };

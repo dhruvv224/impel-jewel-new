@@ -101,27 +101,30 @@ const Shop = () => {
     debounce((searchedText) => {
       setIsLoading(true);
       const queryParams = new URLSearchParams(location.search);
+      queryParams.delete("page");
       if (searchedText?.length > 0) {
-        queryParams.delete("page");
         queryParams.set("search", searchedText);
-        setPagination((prev) => ({ ...prev, currentPage: 1 }));
       } else {
         queryParams.delete("search");
       }
       navigate(
-        `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+        `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
           queryParams.toString() ? `?${queryParams.toString()}` : ""
         }`
       );
-    }, 500), // 500ms debounce delay
+      setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    }, 500),
     [location.search, tagNameFromUrl, navigate]
   );
 
-  const searchbar = (e) => {
-    const searchedText = e.target.value.toUpperCase();
-    setSearchInput(searchedText);
-    debouncedSearch(searchedText);
-  };
+  const searchbar = useCallback(
+    (e) => {
+      const searchedText = e.target.value;
+      setSearchInput(searchedText);
+      debouncedSearch(searchedText ? searchedText.toUpperCase() : "");
+    },
+    [debouncedSearch]
+  );
 
   const handleSelectCategory = (categoryId) => {
     setIsLoading(true);
@@ -144,7 +147,7 @@ const Shop = () => {
     }
 
     navigate(
-      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`
     );
@@ -162,7 +165,7 @@ const Shop = () => {
       queryParams.delete("sort_by");
     }
     navigate(
-      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`
     );
@@ -180,7 +183,7 @@ const Shop = () => {
       queryParams.delete("gender_id");
     }
     navigate(
-      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`
     );
@@ -193,7 +196,7 @@ const Shop = () => {
     const queryParams = new URLSearchParams(location.search);
     queryParams.delete("page");
     navigate(
-      `/shop${selectedTags ? `/${encodeURIComponent(selectedTags.label.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+      `/shop${selectedTags ? `/${encodeURIComponent(selectedTags.label.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`
     );
@@ -208,12 +211,23 @@ const Shop = () => {
     queryParams.set("min_price", e[0]);
     queryParams.set("max_price", e[1]);
     navigate(
-      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`
     );
     setPriceRange({ minprice: e[0], maxprice: e[1] });
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  };
+
+  const clearFilters = () => {
+    setSearchInput(null);
+    setSelectedOption(null);
+    setSelectedCategory(null);
+    setSelectedGender(null);
+    setSelectedTag(null);
+    setPriceRange({ minprice: null, maxprice: null });
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    navigate(`/shop`);
   };
 
   const FilterData = async () => {
@@ -227,7 +241,6 @@ const Shop = () => {
     const currentMinPrice = queryParams.get("min_price");
     const currentMaxPrice = queryParams.get("max_price");
 
-    // Map tag name to tag_id
     const currentTag = filterTag.find(
       (tag) => tag.name.toLowerCase() === tagNameFromUrl?.toLowerCase()
     )?.id || null;
@@ -266,11 +279,7 @@ const Shop = () => {
       const genderRes = await FilterServices.genderFilter();
       setGenderData(genderRes?.data || []);
 
-      if (currentSearch) {
-        setSearchInput(currentSearch);
-      } else {
-        setSearchInput(null);
-      }
+      setSearchInput(currentSearch || null);
 
       if (categoryRes?.data && currentCategory) {
         const Category_ids = categoryRes?.data?.find(
@@ -340,7 +349,8 @@ const Shop = () => {
       }
     } catch (err) {
       console.error("Error fetching filter data:", err);
-      setIsLoading(true);
+      toast.error("Failed to fetch filter data");
+      setIsLoading(false);
     }
   };
 
@@ -348,7 +358,7 @@ const Shop = () => {
     const queryParams = new URLSearchParams(location.search);
     queryParams.set("page", page);
     navigate(
-      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, '-'))}` : ""}${
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`
     );
@@ -378,124 +388,124 @@ const Shop = () => {
   }, [location.pathname, location.search]);
 
   const GetUserWishList = async () => {
-    UserWishlist.userWishlist({ phone: Phone })
-      .then((res) => {
-        setUserCartItems(res?.data?.wishlist_items);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    try {
+      const res = await UserWishlist.userWishlist({ phone: Phone });
+      setUserCartItems(res?.data?.wishlist_items || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch user wishlist");
+    }
   };
 
   const addToUserWishList = async (e, product) => {
     e.preventDefault();
     const payload = { id: product?.id };
     if (!UsercartItems.some((item) => item.id === product.id)) {
-      UserWishlist.addtoWishlist({
+      try {
+        const res = await UserWishlist.addtoWishlist({
+          phone: Phone,
+          design_id: product.id,
+          gold_color: "yellow_gold",
+          gold_type: "18k",
+          design_name: product?.name,
+        });
+        if (res.success === true) {
+          toast.success("Design has been Added to Your Wishlist");
+          GetUserWishList();
+          wishlistDispatch({
+            type: "ADD_TO_WISHLIST",
+            payload,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to add to wishlist");
+      }
+    }
+  };
+
+  const removeFromWishList = async (e, product) => {
+    e.preventDefault();
+    const payload = product;
+    try {
+      const res = await UserWishlist.removetoWishlist({
         phone: Phone,
         design_id: product.id,
         gold_color: "yellow_gold",
         gold_type: "18k",
         design_name: product?.name,
-      })
-        .then((res) => {
-          if (res.success === true) {
-            toast.success("Design has been Added to Your Wishlist");
-            GetUserWishList();
-            wishlistDispatch({
-              type: "ADD_TO_WISHLIST",
-              payload,
-            });
-          }
-        })
-        .catch((err) => {
-          console.log(err);
+      });
+      if (res.success === true) {
+        toast.success("Design has been Removed from Your Wishlist.");
+        GetUserWishList();
+        removeWishlistDispatch({
+          type: "REMOVE_FROM_WISHLIST",
+          payload,
         });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to remove from wishlist");
     }
   };
 
-  const removeFromWishList = (e, product) => {
-    e.preventDefault();
-    const payload = product;
-    UserWishlist.removetoWishlist({
-      phone: Phone,
-      design_id: product.id,
-      gold_color: "yellow_gold",
-      gold_type: "18k",
-      design_name: product?.name,
-    })
-      .then((res) => {
-        if (res.success === true) {
-          toast.success("Design has been Removed from Your Wishlist.");
-          GetUserWishList();
-          removeWishlistDispatch({
-            type: "REMOVE_FROM_WISHLIST",
-            payload,
-          });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  const GetDealerSelection = () => {
-    DealerWishlist.ListCollection({ email: email })
-      .then((res) => {
-        setDealerCollection(res.data?.wishlist_items);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  const GetDealerSelection = async () => {
+    try {
+      const res = await DealerWishlist.ListCollection({ email });
+      setDealerCollection(res.data?.wishlist_items || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch dealer collection");
+    }
   };
 
   const AddToDealerSelection = async (e, product) => {
     e.preventDefault();
     if (!DealerCollection?.some((item) => item.id === product?.id)) {
-      DealerWishlist.addtoDealerWishlist({
-        email: email,
-        design_id: product?.id,
-      })
-        .then((res) => {
-          if (res.success === true) {
-            toast.success("Design has been Added to Your Collection.");
-            FilterData();
-            GetDealerSelection();
-          }
-        })
-        .catch((err) => {
-          console.log(err);
+      try {
+        const res = await DealerWishlist.addtoDealerWishlist({
+          email,
+          design_id: product?.id,
         });
-    }
-  };
-
-  const removeFromSelection = (e, product) => {
-    e.preventDefault();
-    DealerWishlist.removetodealerWishlist({
-      email: localStorage.getItem("email"),
-      design_id: product.id,
-    })
-      .then((res) => {
         if (res.success === true) {
-          toast.success(res.message);
+          toast.success("Design has been Added to Your Collection.");
           FilterData();
           GetDealerSelection();
         }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to add to dealer collection");
+      }
+    }
   };
 
-  const getPdfList = async () => {
-    DealerPdf.pdfList({ email: email })
-      .then((res) => {
-        setPdfItems(res?.data?.pdf_items);
-      })
-      .catch((err) => {
-        console.log(err);
+  const removeFromSelection = async (e, product) => {
+    e.preventDefault();
+    try {
+      const res = await DealerWishlist.removetodealerWishlist({
+        email,
+        design_id: product.id,
       });
+      if (res.success === true) {
+        toast.success(res.message);
+        FilterData();
+        GetDealerSelection();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to remove from dealer collection");
+    }
   };
+
+  const getPdfList = useCallback(async () => {
+    try {
+      const res = await DealerPdf.pdfList({ email });
+      setPdfItems(res?.data?.pdf_items || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch PDF list");
+    }
+  }, [email]);
 
   useEffect(() => {
     if (Phone) {
@@ -506,46 +516,46 @@ const Shop = () => {
       GetDealerSelection();
       getPdfList();
     }
-  }, []);
+  }, [Phone, email, getPdfList]);
 
   const addToPDF = async (e, product) => {
     e.preventDefault();
     if (!pdfItems.some((item) => item.id === product.id)) {
-      DealerPdf.addToPdf({
-        email: email,
-        design_id: product.id,
-      })
-        .then((res) => {
-          getPdfList();
-          toast.success(res.message);
-        })
-        .catch((err) => {
-          console.log(err);
+      try {
+        const res = await DealerPdf.addToPdf({
+          email,
+          design_id: product.id,
         });
+        getPdfList();
+        toast.success(res.message);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to add to PDF");
+      }
     }
   };
 
-  const removeToPDF = (e, product) => {
+  const removeToPDF = async (e, product) => {
     e.preventDefault();
-    DealerPdf.removePdf({
-      email: email,
-      design_ids: [product.id],
-    })
-      .then((res) => {
-        if (res.success === true) {
-          getPdfList();
-          toast.success(res.message);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
+    try {
+      const res = await DealerPdf.removePdf({
+        email,
+        design_ids: [product.id],
       });
+      if (res.success === true) {
+        getPdfList();
+        toast.success(res.message);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to remove from PDF");
+    }
   };
 
   const UserLogin = (e) => {
     e.preventDefault();
     localStorage.setItem("redirectPath", location.pathname);
-    navigate("/login");
+navigate('/login', { state: { from: location.pathname } });
   };
 
   const DealerLogin = (e) => {
@@ -554,12 +564,10 @@ const Shop = () => {
     navigate("/dealer-login");
   };
 
-  const wishlistTip = <Tooltip id="tooltip">wishlist</Tooltip>;
+  const wishlistTip = <Tooltip id="tooltip">Wishlist</Tooltip>;
   const selectionTip = <Tooltip id="tooltip">My Selections</Tooltip>;
   const pdfTip = <Tooltip id="tooltip">My PDF share</Tooltip>;
-  const userTip = (
-    <Tooltip id="tooltip">Login to add wishlist products</Tooltip>
-  );
+  const userTip = <Tooltip id="tooltip">Login to add wishlist products</Tooltip>;
 
   const shimmerItems = Array(20).fill(null);
 
@@ -607,13 +615,10 @@ const Shop = () => {
                     type="search"
                     className="form-control"
                     placeholder="Search by design code"
-                    value={searchInput}
+                    value={searchInput || ""}
                     onChange={(e) => searchbar(e)}
-                    isClearable={true}
                   />
-                  {searchInput && searchInput.length >= 1 ? null : (
-                    <BsSearch className="search-icon cursor-pointer" />
-                  )}
+                  <BsSearch className="search-icon cursor-pointer" />
                 </div>
               </div>
               <div className="col-lg-3 col-md-6 col-12 mb-lg-4 mb-md-3 mb-2">
@@ -682,14 +687,19 @@ const Shop = () => {
                   </Accordion.Item>
                 </Accordion>
               </div>
+              <div className="col-lg-3 col-md-6 col-12 mb-lg-4 mb-md-3 mb-2">
+                <button className="btn btn-secondary w-100" onClick={clearFilters}>
+                  Clear Filters
+                </button>
+              </div>
             </div>
 
             {isLoading ? (
               <>
                 <div className="row">
                   {shimmerItems.map((_, index) => (
-                    <div className="col-lg-3 col-md-6 col-12">
-                      <div key={index} className="shimmer-product">
+                    <div className="col-lg-3 col-md-6 col-12" key={index}>
+                      <div className="shimmer-product">
                         <div className="shimmer-image"></div>
                         <div className="shimmer-price"></div>
                         <div className="shimmer-price"></div>
@@ -705,258 +715,226 @@ const Shop = () => {
                     {filterData?.length > 0 ? (
                       <>
                         <div className="row">
-                          {filterData?.map((data) => {
-                            return (
-                              <>
-                                <div className="col-lg-3 col-md-6 col-12">
-                                  <motion.div
-                                    className="item-product text-center"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.5 }}
-                                  >
-                                    <Link
-                                      to={`/shopdetails/${encodeURIComponent(
-                                        data.name.toLowerCase().replace(/\s+/g, '-')
-                                      )}/${data?.code}`}
-                                      state={{ id: data.id, name: data.name }}
-                                    >
-                                      <div className="product-thumb">
-                                        {data?.image ? (
-                                          <>
-                                            <motion.img
-                                              src={data?.image}
-                                              alt=""
-                                              className="w-100"
-                                              initial={{ opacity: 0 }}
-                                              animate={{ opacity: 1 }}
-                                              transition={{ duration: 0.5 }}
-                                              whileHover={{ scale: 1.05 }}
-                                            />
-                                          </>
-                                        ) : (
-                                          <>
-                                            <img
-                                              src="https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"
-                                              alt=""
-                                              className="w-100"
-                                            />
-                                          </>
-                                        )}
-                                      </div>
-                                      <div className="product-info">
-                                        <div className="product-info d-grid">
-                                          {(data?.making_charge_discount_18k >
-                                            0 &&
-                                            Phone) ||
-                                          (email && userId) ? (
-                                            <>
-                                              <del style={{ color: "#000" }}>
-                                                ₹
-                                                {numberFormat(
-                                                  data?.making_charge_18k +
-                                                    data?.metal_value_18k
-                                                )}
-                                              </del>
-                                              <label>
-                                                <strong className="text-success">
-                                                  ₹
-                                                  {numberFormat(
-                                                    data?.metal_value_18k +
-                                                      data?.making_charge_discount_18k
-                                                  )}
-                                                </strong>
-                                              </label>
-                                            </>
-                                          ) : (
+                          {filterData?.map((data) => (
+                            <div className="col-lg-3 col-md-6 col-12" key={data.id}>
+                              <motion.div
+                                className="item-product text-center"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <Link
+                                  to={`/shopdetails/${encodeURIComponent(
+                                    data.name.toLowerCase().replace(/\s+/g, "-")
+                                  )}/${data?.code}`}
+                                  state={{ id: data.id, name: data.name }}
+                                >
+                                  <div className="product-thumb">
+                                    {data?.image ? (
+                                      <motion.img
+                                        src={data?.image}
+                                        alt=""
+                                        className="w-100"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.5 }}
+                                        whileHover={{ scale: 1.05 }}
+                                      />
+                                    ) : (
+                                      <img
+                                        src="https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"
+                                        alt=""
+                                        className="w-100"
+                                      />
+                                    )}
+                                  </div>
+                                  <div className="product-info">
+                                    <div className="product-info d-grid">
+                                      {(data?.making_charge_discount_18k > 0 &&
+                                        Phone) ||
+                                      (email && userId) ? (
+                                        <>
+                                          <del style={{ color: "#000" }}>
+                                            ₹
+                                            {numberFormat(
+                                              data?.making_charge_18k +
+                                                data?.metal_value_18k
+                                            )}
+                                          </del>
+                                          <label>
                                             <strong className="text-success">
                                               ₹
-                                              {Phone && userId ? (
-                                                <>
-                                                  {numberFormat(
-                                                    data?.total_amount_18k
-                                                  )}
-                                                </>
-                                              ) : (
-                                                <>
-                                                  {numberFormat(
-                                                    data?.making_charge_18k +
-                                                      data?.metal_value_18k
-                                                  )}
-                                                </>
+                                              {numberFormat(
+                                                data?.metal_value_18k +
+                                                  data?.making_charge_discount_18k
                                               )}
                                             </strong>
-                                          )}
-                                        </div>
-                                        {userType == 1 && (
-                                          <div className="mt-1">
-                                            <span
-                                              style={{
-                                                color: "#db9662",
-                                                fontWeight: 700,
-                                              }}
-                                            >
-                                              {data?.code}
-                                            </span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </Link>
-                                    <div className="wishlist-top">
-                                      {userType == 1 ? (
-                                        <>
-                                          {email ? (
-                                            <OverlayTrigger
-                                              placement="top"
-                                              overlay={selectionTip}
-                                            >
-                                              <Link
-                                                to="#"
-                                                className="dealer_heart_icon"
-                                                onClick={(e) => {
-                                                  if (
-                                                    DealerCollection?.find(
-                                                      (item) =>
-                                                        item?.id === data?.id
-                                                    )
-                                                  ) {
-                                                    removeFromSelection(
-                                                      e,
-                                                      data
-                                                    );
-                                                  } else {
-                                                    AddToDealerSelection(
-                                                      e,
-                                                      data
-                                                    );
-                                                  }
-                                                }}
-                                              >
-                                                {DealerCollection?.find(
-                                                  (item) =>
-                                                    item?.id === data?.id
-                                                ) ? (
-                                                  <FaStar />
-                                                ) : (
-                                                  <FaRegStar />
-                                                )}
-                                              </Link>
-                                            </OverlayTrigger>
-                                          ) : (
-                                            <span
-                                              onClick={(e) => DealerLogin(e)}
-                                            >
-                                              <FaRegStar />
-                                            </span>
-                                          )}
-                                          {email ? (
-                                            <OverlayTrigger
-                                              placement="top"
-                                              overlay={pdfTip}
-                                            >
-                                              <Link
-                                                to="#"
-                                                className="dealer_heart_icon"
-                                                onClick={(e) => {
-                                                  if (
-                                                    pdfItems?.find(
-                                                      (item) =>
-                                                        item?.id === data?.id
-                                                    )
-                                                  ) {
-                                                    removeToPDF(e, data);
-                                                  } else {
-                                                    addToPDF(e, data);
-                                                  }
-                                                }}
-                                              >
-                                                {pdfItems?.find(
-                                                  (item) =>
-                                                    item?.id === data?.id
-                                                ) ? (
-                                                  <FaFilePdf />
-                                                ) : (
-                                                  <FaRegFilePdf />
-                                                )}
-                                              </Link>
-                                            </OverlayTrigger>
-                                          ) : (
-                                            <span
-                                              onClick={(e) => DealerLogin(e)}
-                                            >
-                                              <FaRegFilePdf />
-                                            </span>
-                                          )}
+                                          </label>
                                         </>
                                       ) : (
-                                        <>
-                                          {Phone ? (
-                                            <OverlayTrigger
-                                              placement="top"
-                                              overlay={wishlistTip}
-                                            >
-                                              <Link
-                                                to="#"
-                                                className=""
-                                                onClick={(e) => {
-                                                  if (
-                                                    UsercartItems?.find(
-                                                      (item) =>
-                                                        item.id === data.id
-                                                    )
-                                                  ) {
-                                                    removeFromWishList(e, data);
-                                                  } else {
-                                                    addToUserWishList(e, data);
-                                                  }
-                                                }}
-                                              >
-                                                {UsercartItems?.find(
-                                                  (item) => item.id === data.id
-                                                ) ? (
-                                                  <FcLike />
-                                                ) : (
-                                                  <FiHeart />
-                                                )}
-                                              </Link>
-                                            </OverlayTrigger>
+                                        <strong className="text-success">
+                                          ₹
+                                          {Phone && userId ? (
+                                            numberFormat(data?.total_amount_18k)
                                           ) : (
-                                            <OverlayTrigger
-                                              placement="top"
-                                              overlay={userTip}
-                                            >
-                                              <span
-                                                className=""
-                                                onClick={(e) => UserLogin(e)}
-                                              >
-                                                <FiHeart
-                                                  style={{
-                                                    fontSize: "22px",
-                                                  }}
-                                                />
-                                              </span>
-                                            </OverlayTrigger>
+                                            numberFormat(
+                                              data?.making_charge_18k +
+                                                data?.metal_value_18k
+                                            )
                                           )}
-                                        </>
+                                        </strong>
                                       )}
                                     </div>
-                                  </motion.div>
+                                    {userType == 1 && (
+                                      <div className="mt-1">
+                                        <span
+                                          style={{
+                                            color: "#db9662",
+                                            fontWeight: 700,
+                                          }}
+                                        >
+                                          {data?.code}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </Link>
+                                <div className="wishlist-top">
+                                  {userType == 1 ? (
+                                    <>
+                                      {email ? (
+                                        <OverlayTrigger
+                                          placement="top"
+                                          overlay={selectionTip}
+                                        >
+                                          <Link
+                                            to="#"
+                                            className="dealer_heart_icon"
+                                            onClick={(e) => {
+                                              if (
+                                                DealerCollection?.find(
+                                                  (item) => item?.id === data?.id
+                                                )
+                                              ) {
+                                                removeFromSelection(e, data);
+                                              } else {
+                                                AddToDealerSelection(e, data);
+                                              }
+                                            }}
+                                          >
+                                            {DealerCollection?.find(
+                                              (item) => item?.id === data?.id
+                                            ) ? (
+                                              <FaStar />
+                                            ) : (
+                                              <FaRegStar />
+                                            )}
+                                          </Link>
+                                        </OverlayTrigger>
+                                      ) : (
+                                        <span onClick={(e) => DealerLogin(e)}>
+                                          <FaRegStar />
+                                        </span>
+                                      )}
+                                      {email ? (
+                                        <OverlayTrigger
+                                          placement="top"
+                                          overlay={pdfTip}
+                                        >
+                                          <Link
+                                            to="#"
+                                            className="dealer_heart_icon"
+                                            onClick={(e) => {
+                                              if (
+                                                pdfItems?.find(
+                                                  (item) => item?.id === data?.id
+                                                )
+                                              ) {
+                                                removeToPDF(e, data);
+                                              } else {
+                                                addToPDF(e, data);
+                                              }
+                                            }}
+                                          >
+                                            {pdfItems?.find(
+                                              (item) => item?.id === data?.id
+                                            ) ? (
+                                              <FaFilePdf />
+                                            ) : (
+                                              <FaRegFilePdf />
+                                            )}
+                                          </Link>
+                                        </OverlayTrigger>
+                                      ) : (
+                                        <span onClick={(e) => DealerLogin(e)}>
+                                          <FaRegFilePdf />
+                                        </span>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      {Phone ? (
+                                        <OverlayTrigger
+                                          placement="top"
+                                          overlay={wishlistTip}
+                                        >
+                                          <Link
+                                            to="#"
+                                            className=""
+                                            onClick={(e) => {
+                                              if (
+                                                UsercartItems?.find(
+                                                  (item) => item.id === data.id
+                                                )
+                                              ) {
+                                                removeFromWishList(e, data);
+                                              } else {
+                                                addToUserWishList(e, data);
+                                              }
+                                            }}
+                                          >
+                                            {UsercartItems?.find(
+                                              (item) => item.id === data.id
+                                            ) ? (
+                                              <FcLike />
+                                            ) : (
+                                              <FiHeart />
+                                            )}
+                                          </Link>
+                                        </OverlayTrigger>
+                                      ) : (
+                                        <OverlayTrigger
+                                          placement="top"
+                                          overlay={userTip}
+                                        >
+                                          <span
+                                            className=""
+                                            onClick={(e) => UserLogin(e)}
+                                          >
+                                            <FiHeart
+                                              style={{
+                                                fontSize: "22px",
+                                              }}
+                                            />
+                                          </span>
+                                        </OverlayTrigger>
+                                      )}
+                                    </>
+                                  )}
                                 </div>
-                              </>
-                            );
-                          })}
+                              </motion.div>
+                            </div>
+                          ))}
                         </div>
 
-                        <div className="pt-5">
-                          {totalPages > 1 && (
+                        {totalPages > 1 && (
+                          <div className="pt-5">
                             <div className="paginationArea">
                               <nav aria-label="navigation">
                                 <ul className="pagination">
                                   <li
                                     className={`page-item ${
-                                      pagination.currentPage === 1
-                                        ? "disabled"
-                                        : ""
+                                      pagination.currentPage === 1 ? "disabled" : ""
                                     }`}
                                   >
                                     <Link
@@ -1035,8 +1013,8 @@ const Shop = () => {
                                 </ul>
                               </nav>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </>
                     ) : (
                       <div className="not-products">

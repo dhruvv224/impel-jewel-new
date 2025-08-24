@@ -18,7 +18,7 @@ const DealerProtectedRoute = (props) => {
   const checkDealer = () => {
     if (!userToken) {
       setIsLoggedIn(false);
-      return navigate("/login");
+      return navigate('/login', { state: { from: location.pathname } });
     }
     setIsLoggedIn(true);
   };
