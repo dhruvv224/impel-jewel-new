@@ -51,7 +51,9 @@ const Shop = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filterData, setFilterData] = useState([]);
   const [paginate, setPaginate] = useState();
-  const [searchInput, setSearchInput] = useState(null);
+  const params = new URLSearchParams(window.location.search);
+const initialSearch = params.get("search") || "";
+const [searchInput, setSearchInput] = useState(initialSearch);
   const [selectedOption, setSelectedOption] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -98,33 +100,35 @@ const Shop = () => {
 
   // Debounced search handler
   const debouncedSearch = useCallback(
-    debounce((searchedText) => {
-      setIsLoading(true);
-      const queryParams = new URLSearchParams(location.search);
-      queryParams.delete("page");
-      if (searchedText?.length > 0) {
-        queryParams.set("search", searchedText);
-      } else {
-        queryParams.delete("search");
-      }
-      navigate(
-        `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
-          queryParams.toString() ? `?${queryParams.toString()}` : ""
-        }`
-      );
-      setPagination((prev) => ({ ...prev, currentPage: 1 }));
-    }, 500),
-    [location.search, tagNameFromUrl, navigate]
-  );
+  debounce((searchedText) => {
+    setIsLoading(true);
+    const queryParams = new URLSearchParams(location.search);
+    queryParams.delete("page");
+    if (searchedText?.trim().length > 0) {
+      queryParams.set("search", searchedText);
+    } else {
+      queryParams.delete("search");
+    }
+    navigate(
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
+    );
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  }, 500),
+  [location.search, tagNameFromUrl, navigate]
+);
+
 
   const searchbar = useCallback(
-    (e) => {
-      const searchedText = e.target.value;
-      setSearchInput(searchedText);
-      debouncedSearch(searchedText ? searchedText.toUpperCase() : "");
-    },
-    [debouncedSearch]
-  );
+  (e) => {
+    const searchedText = e.target.value;
+    setSearchInput(searchedText); // Keep typed value
+    debouncedSearch(searchedText); // Pass raw value, not uppercase
+  },
+  [debouncedSearch]
+);
+
 
   const handleSelectCategory = (categoryId) => {
     setIsLoading(true);
@@ -279,7 +283,7 @@ const Shop = () => {
       const genderRes = await FilterServices.genderFilter();
       setGenderData(genderRes?.data || []);
 
-      setSearchInput(currentSearch || null);
+
 
       if (categoryRes?.data && currentCategory) {
         const Category_ids = categoryRes?.data?.find(

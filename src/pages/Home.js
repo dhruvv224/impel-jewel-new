@@ -88,12 +88,12 @@ const Home = () => {
     queryFn: () => homeService.category(),
     select: (data) => data?.data || [],
   });
-
   const { data: newAdd } = useQuery({
     queryKey: ["recentAdd"],
     queryFn: () => homeService.RecentAdd(),
     select: (data) => data?.data || [],
   });
+
   const { data: review } = useQuery({
     queryKey: ["TestiMonials"],
     queryFn: () => homeService.TestiMonials(),

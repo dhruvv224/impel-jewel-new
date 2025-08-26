@@ -21,7 +21,7 @@ const debounce = (func, wait) => {
   let timeout;
   return (...args) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
+    timeout = setTimeout(() => func(...args), wait);
   };
 };
 
@@ -42,7 +42,7 @@ const ReadytoDispatch = () => {
   const [filters, setFilters] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [tagNoChange, setTagNoChange] = useState(null);
+  const [tagNoChange, setTagNoChange] = useState(""); // raw input value
   const [companyId, setCompanyId] = useState(null);
   const [selectedSizes, setSelectedSizes] = useState(null);
   const [selectedItemGroups, setSelectedItemGroups] = useState(null);
@@ -60,22 +60,34 @@ const ReadytoDispatch = () => {
   const totalPages = Math.ceil(totalItems / pagination.dataShowLength);
 
   // Centralized debounced function to update URL and fetch data
-const debouncedUpdate = useCallback(
-  debounce((queryParams, newState) => {
+  // Debounced API/search update
+  const debouncedNavigate = useRef(
+  debounce((searchText) => {
+    const queryParams = new URLSearchParams(location.search);
+    queryParams.delete("page");
+    if (searchText.trim().length > 0) {
+      queryParams.set("search", searchText); // preserve case
+    } else {
+      queryParams.delete("search");
+    }
+    navigate(`/ready-to-dispatch?${queryParams.toString()}`);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  }, 500)
+);
+const debouncedSearch = useRef(
+  debounce((searchText) => {
+    const queryParams = new URLSearchParams(location.search);
+    queryParams.delete("page");
+    if (searchText.length > 0) {
+      // Remove .toUpperCase() to preserve original case
+      queryParams.set("search", searchText);
+    } else {
+      queryParams.delete("search");
+    }
     setIsLoading(true);
     navigate(`/ready-to-dispatch${queryParams ? `?${queryParams.toString()}` : ""}`);
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
-    Object.keys(newState).forEach((key) => {
-      if (key === "tagNoChange") setTagNoChange(newState[key] || null); // Ensure null when empty
-      if (key === "companyId") setCompanyId(newState[key]);
-      if (key === "selectedSizes") setSelectedSizes(newState[key]);
-      if (key === "selectedItemGroups") setSelectedItemGroups(newState[key]);
-      if (key === "selectedItems") setSelectedItems(newState[key]);
-      if (key === "selectedSubItems") setSelectedSubItems(newState[key]);
-      if (key === "selectedStyles") setSelectedStyles(newState[key]);
-    });
-  }, 500),
-  [navigate]
+  }, 500)
 );
 
   // Generic handler for filter changes
@@ -87,24 +99,27 @@ const debouncedUpdate = useCallback(
     } else {
       queryParams.delete(paramName);
     }
-    debouncedUpdate(queryParams, { [key]: selectedOption });
+    // Use debounced navigation for filters
+    debouncedSearch.current(""); // Just trigger navigation, no search text
+    // Update state for the filter
+    switch (key) {
+      case "companyId": setCompanyId(selectedOption); break;
+      case "selectedSizes": setSelectedSizes(selectedOption); break;
+      case "selectedItemGroups": setSelectedItemGroups(selectedOption); break;
+      case "selectedItems": setSelectedItems(selectedOption); break;
+      case "selectedSubItems": setSelectedSubItems(selectedOption); break;
+      case "selectedStyles": setSelectedStyles(selectedOption); break;
+      default: break;
+    }
   };
 
   // Specific filter handlers
-  const handleSearchItems = useCallback(
-  (e) => {
-    const searchedText = e.target.value; // Keep the raw input for display
-    const queryParams = new URLSearchParams(location.search);
-    queryParams.delete("page");
-    if (searchedText.length > 0) {
-      queryParams.set("search", searchedText.toUpperCase()); // Convert to uppercase for API
-    } else {
-      queryParams.delete("search");
-    }
-    debouncedUpdate(queryParams, { tagNoChange: searchedText || null });
-  },
-  [debouncedUpdate]
-);
+  // Simple debounced search handler
+const handleSearchItems = (e) => {
+  const searchedText = e.target.value;
+  setTagNoChange(searchedText); // Always set what user types
+  debouncedNavigate.current(searchedText); // Trigger URL update after debounce
+};
 
   const handleItems = (selectedOption) => handleFilterChange("selectedItems", selectedOption, "items");
   const handleSubItems = (selectedOption) => handleFilterChange("selectedSubItems", selectedOption, "sub-items");
@@ -202,7 +217,9 @@ const debouncedUpdate = useCallback(
       setFilters(filterData?.Filters || []);
 
       // Update state based on URL parameters
-      setTagNoChange(currentSearch || null);
+      if (!tagNoChange) {
+  setTagNoChange(currentSearch || "");
+}
       setSelectedItems(
         itemsFromURL && filterData?.Filters?.Items
           ? filterData.Filters.Items.find((item) => item?.ItemID === Number(itemsFromURL))
@@ -291,19 +308,20 @@ const debouncedUpdate = useCallback(
     };
   // Fetch product prices and PDF list
   useEffect(() => {
-  const fetchProductPrices = async () => {
-    try {
-      const res = await profileService.GetProductsPrices();
-      setAllPrices(res?.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const fetchProductPrices = async () => {
+      try {
+        const res = await profileService.GetProductsPrices();
+        setAllPrices(res?.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  fetchProductPrices();
-  if (email) fetchPdfList();
-  fetchMasterGroups();
-}, [email, fetchPdfList]);
+    fetchProductPrices();
+    if (email) fetchPdfList();
+    fetchMasterGroups();
+    // Only depend on 'email' so this runs once on mount or when email changes
+  }, [email]);
 
   // Fetch products and filters on location change
   useEffect(() => {

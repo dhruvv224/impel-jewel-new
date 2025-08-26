@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.ca4b45e0.css",
-    "main.js": "/static/js/main.ab36ebd9.js",
+    "main.js": "/static/js/main.de249cef.js",
     "static/js/453.258b012d.chunk.js": "/static/js/453.258b012d.chunk.js",
     "static/media/DSC00928.JPG": "/static/media/DSC00928.ba73431c34a89034ae27.JPG",
     "static/media/DSC00910.JPG": "/static/media/DSC00910.2adabec0e79a1b3e3fc9.JPG",
@@ -26,11 +26,11 @@
     "static/media/engagement-ring_7354745.png": "/static/media/engagement-ring_7354745.735009e1e7c1f1e77280.png",
     "index.html": "/index.html",
     "main.ca4b45e0.css.map": "/static/css/main.ca4b45e0.css.map",
-    "main.ab36ebd9.js.map": "/static/js/main.ab36ebd9.js.map",
+    "main.de249cef.js.map": "/static/js/main.de249cef.js.map",
     "453.258b012d.chunk.js.map": "/static/js/453.258b012d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ca4b45e0.css",
-    "static/js/main.ab36ebd9.js"
+    "static/js/main.de249cef.js"
   ]
 }
