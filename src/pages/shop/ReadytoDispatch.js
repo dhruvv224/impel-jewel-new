@@ -61,12 +61,12 @@ const ReadytoDispatch = () => {
 
   // Centralized debounced function to update URL and fetch data
   // Debounced API/search update
-  const debouncedNavigate = useRef(
+const debouncedNavigate = useRef(
   debounce((searchText) => {
     const queryParams = new URLSearchParams(location.search);
     queryParams.delete("page");
     if (searchText.trim().length > 0) {
-      queryParams.set("search", searchText); // preserve case
+      queryParams.set("search", searchText);
     } else {
       queryParams.delete("search");
     }
@@ -74,6 +74,7 @@ const ReadytoDispatch = () => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   }, 500)
 );
+
 const debouncedSearch = useRef(
   debounce((searchText) => {
     const queryParams = new URLSearchParams(location.search);
@@ -91,34 +92,39 @@ const debouncedSearch = useRef(
 );
 
   // Generic handler for filter changes
-  const handleFilterChange = (key, selectedOption, paramName) => {
-    const queryParams = new URLSearchParams(location.search);
-    queryParams.delete("page");
-    if (selectedOption) {
-      queryParams.set(paramName, selectedOption.value);
-    } else {
-      queryParams.delete(paramName);
-    }
-    // Use debounced navigation for filters
-    debouncedSearch.current(""); // Just trigger navigation, no search text
-    // Update state for the filter
-    switch (key) {
-      case "companyId": setCompanyId(selectedOption); break;
-      case "selectedSizes": setSelectedSizes(selectedOption); break;
-      case "selectedItemGroups": setSelectedItemGroups(selectedOption); break;
-      case "selectedItems": setSelectedItems(selectedOption); break;
-      case "selectedSubItems": setSelectedSubItems(selectedOption); break;
-      case "selectedStyles": setSelectedStyles(selectedOption); break;
-      default: break;
-    }
-  };
+const handleFilterChange = (key, selectedOption, paramName) => {
+  const queryParams = new URLSearchParams(location.search);
+  queryParams.delete("page"); // reset pagination
+
+  if (selectedOption) {
+    queryParams.set(paramName, selectedOption.value);
+  } else {
+    queryParams.delete(paramName);
+  }
+
+  // ✅ Update URL with new query params
+  navigate(`/ready-to-dispatch?${queryParams.toString()}`);
+  setPagination((prev) => ({ ...prev, currentPage: 1 }));
+
+  // ✅ Update local state
+  switch (key) {
+    case "companyId": setCompanyId(selectedOption); break;
+    case "selectedSizes": setSelectedSizes(selectedOption); break;
+    case "selectedItemGroups": setSelectedItemGroups(selectedOption); break;
+    case "selectedItems": setSelectedItems(selectedOption); break;
+    case "selectedSubItems": setSelectedSubItems(selectedOption); break;
+    case "selectedStyles": setSelectedStyles(selectedOption); break;
+    default: break;
+  }
+};
+
 
   // Specific filter handlers
   // Simple debounced search handler
 const handleSearchItems = (e) => {
   const searchedText = e.target.value;
-  setTagNoChange(searchedText); // Always set what user types
-  debouncedNavigate.current(searchedText); // Trigger URL update after debounce
+  setTagNoChange(searchedText);
+  debouncedNavigate.current(searchedText);
 };
 
   const handleItems = (selectedOption) => handleFilterChange("selectedItems", selectedOption, "items");
