@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -32,11 +32,27 @@ import { useQuery } from "@tanstack/react-query";
 import BannerShimmer from "../shimmer/BannerShimmer";
 
 const Home = () => {
+  // Utility to extract only text from HTML
+  function extractTextFromHTML(html) {
+    if (!html) return '';
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || '';
+  }
   const firstbannerRef = useRef(null);
   const secondbannerRef = useRef(null);
   const thirdbannerRef = useRef(null);
   const fourthbannerRef = useRef(null);
   const fifthbannerRef = useRef(null);
+
+  // Popup state
+  const [showPopup, setShowPopup] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const videoEl = useRef(null);
 
@@ -105,9 +121,87 @@ const Home = () => {
     queryFn: () => homeService.TopSelling(),
     select: (data) => data?.data || [],
   });
-
+ const { data: popupData } = useQuery({
+    queryKey: [""],
+    queryFn: () => homeService.GetPopUpData(),
+    select: (data) => data?.data || [],
+  });
+  console.log(popupData,":::")
   return (
     <>
+      {/* Popup */}
+      {showPopup && popupData?.[0] && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            zIndex: 9999,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            animation: "fadeIn 0.5s",
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "18px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+              padding: "32px 24px 24px 24px",
+              maxWidth: "370px",
+              width: "90%",
+              textAlign: "center",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <button
+              onClick={() => setShowPopup(false)}
+              style={{
+                position: "absolute",
+                top: "14px",
+                right: "14px",
+                background: "#f5f5f5",
+                border: "none",
+                borderRadius: "50%",
+                width: "32px",
+                height: "32px",
+                fontSize: "22px",
+                cursor: "pointer",
+                color: "#bfa76f",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                transition: "background 0.2s",
+              }}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <img
+              src={popupData[0]?.image}
+              alt={popupData[0]?.title}
+              style={{
+                width: "90px",
+                height: "90px",
+                objectFit: "cover",
+                borderRadius: "12px",
+                marginBottom: "16px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                border: "2px solid #bfa76f",
+              }}
+            />
+            <h2 style={{ marginBottom: "10px", color: "#bfa76f", fontWeight: 700, fontSize: "1.5rem" }}>
+              {popupData[0]?.title}
+            </h2>
+            <p style={{ color: "#444", fontSize: "16px", marginBottom: 0 }}>
+              {extractTextFromHTML(popupData[0]?.description)}
+            </p>
+          </div>
+        </div>
+      )}
       <Helmet>
         <title>Impel Store - Home</title>
       </Helmet>

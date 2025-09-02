@@ -124,6 +124,13 @@ const GetPages = async () => {
   });
   return d;
 };
+const GetPopUpData=async()=>{
+  let d = await call({
+    path: "AboutSections",
+    method: "GET",
+  });
+  return d;
+}
 
 const exportObject = {
   banners,
@@ -141,6 +148,7 @@ const exportObject = {
   SiteSetting,
   GetProductsPrices,
   TestiMonials,
+  GetPopUpData,
 };
 
 export default exportObject;

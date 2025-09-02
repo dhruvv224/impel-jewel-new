@@ -71,10 +71,10 @@ const WomansClub = () => {
       valid = false;
     }
 
-    if (details.message && details.message.length < 50) {
-      newErrors.message = "Message must contain at least 50 characters!";
-      valid = false;
-    }
+    // if (details.message && details.message.length < 50) {
+    //   newErrors.message = "Message must contain at least 50 characters!";
+    //   valid = false;
+    // }
 
     if (
       !(
