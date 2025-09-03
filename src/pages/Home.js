@@ -47,10 +47,11 @@ const Home = () => {
 
   // Popup state
   const [showPopup, setShowPopup] = useState(false);
+  const [popupTimer,setPopupTimer] = useState(0);
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowPopup(true);
-    }, 10000);
+    }, popupTimer);
     return () => clearTimeout(timer);
   }, []);
 
@@ -127,6 +128,11 @@ const Home = () => {
     select: (data) => data?.data || [],
   });
   console.log(popupData,":::")
+  useEffect(() => {
+    if (popupData?.[0]?.duration) {
+      setPopupTimer(popupData[0].timer);
+    }
+  }, [popupData]);
   return (
     <>
       {/* Popup */}
@@ -180,12 +186,13 @@ const Home = () => {
             >
               &times;
             </button>
-            <img
+           {popupData[0]?.image &&
+             <img
               src={popupData[0]?.image}
               alt={popupData[0]?.title}
               style={{
-                width: "90px",
-                height: "90px",
+                width: "150px",
+                height: "150px",
                 objectFit: "cover",
                 borderRadius: "12px",
                 marginBottom: "16px",
@@ -193,6 +200,7 @@ const Home = () => {
                 border: "2px solid #bfa76f",
               }}
             />
+           }
             <h2 style={{ marginBottom: "10px", color: "#bfa76f", fontWeight: 700, fontSize: "1.5rem" }}>
               {popupData[0]?.title}
             </h2>
