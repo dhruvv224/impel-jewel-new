@@ -137,79 +137,97 @@ const Home = () => {
     <>
       {/* Popup */}
       {showPopup && popupData?.[0] && (
-        <div
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      zIndex: 9999,
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0,0,0,0.6)", // Darker overlay for focus
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      animation: "fadeIn 0.5s",
+      backdropFilter: "blur(4px)", // Adds a subtle blur to the background
+    }}
+  >
+    <div
+      style={{
+        background: "#fff",
+        borderRadius: "24px",
+        boxShadow: "0 16px 64px rgba(0,0,0,0.3)", // Stronger, more prominent shadow
+        padding: "48px 48px 36px 48px",
+        maxWidth: "800px", // Increased max-width for a bigger popup
+        width: "90%",
+        textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
+        border: "1px solid #e0e0e0", // A subtle border
+      }}
+    >
+      <button
+        onClick={() => setShowPopup(false)}
+        style={{
+          position: "absolute",
+          top: "16px",
+          right: "16px",
+          background: "transparent",
+          border: "none",
+          width: "32px",
+          height: "32px",
+          fontSize: "24px", // Bigger icon
+          cursor: "pointer",
+          color: "#aaa", // Softer color
+          transition: "color 0.2s",
+        }}
+        onMouseOver={e => e.currentTarget.style.color = '#bfa76f'}
+        onMouseOut={e => e.currentTarget.style.color = '#aaa'}
+        aria-label="Close"
+      >
+        &times;
+      </button>
+
+      {popupData[0]?.image && (
+        <img
+          src={popupData[0]?.image}
+          alt={popupData[0]?.title}
           style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            zIndex: 9999,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            animation: "fadeIn 0.5s",
+            width: "100%", // Larger image size
+            height: "100%",
+            objectFit: "cover",
+            borderRadius: "18px", // Square image with slightly rounded corners
+            marginBottom: "36px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.15)", // A more impactful shadow
+            border: "4px solid #bfa76f",
           }}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "18px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-              padding: "32px 24px 24px 24px",
-              maxWidth: "370px",
-              width: "90%",
-              textAlign: "center",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <button
-              onClick={() => setShowPopup(false)}
-              style={{
-                position: "absolute",
-                top: "14px",
-                right: "14px",
-                background: "#f5f5f5",
-                border: "none",
-                borderRadius: "50%",
-                width: "32px",
-                height: "32px",
-                fontSize: "22px",
-                cursor: "pointer",
-                color: "#bfa76f",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                transition: "background 0.2s",
-              }}
-              aria-label="Close"
-            >
-              &times;
-            </button>
-           {popupData[0]?.image &&
-             <img
-              src={popupData[0]?.image}
-              alt={popupData[0]?.title}
-              style={{
-                width: "150px",
-                height: "150px",
-                objectFit: "cover",
-                borderRadius: "12px",
-                marginBottom: "16px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                border: "2px solid #bfa76f",
-              }}
-            />
-           }
-            <h2 style={{ marginBottom: "10px", color: "#bfa76f", fontWeight: 700, fontSize: "1.5rem" }}>
-              {popupData[0]?.title}
-            </h2>
-            <p style={{ color: "#444", fontSize: "16px", marginBottom: 0 }}>
-              {extractTextFromHTML(popupData[0]?.description)}
-            </p>
-          </div>
-        </div>
+        />
       )}
+      <h2
+        style={{
+          marginBottom: "16px",
+          color: "#333", // Darker text for readability
+          fontWeight: 700,
+          fontSize: "2.2rem", // Bigger, more impactful headline
+          letterSpacing: "-0.5px", // Subtle letter spacing adjustment
+        }}
+      >
+        {popupData[0]?.title}
+      </h2>
+      <p
+        style={{
+          color: "#666", // Softer body text color
+          fontSize: "18px", // Slightly larger body text
+          lineHeight: "1.6", // Better line spacing for readability
+          marginBottom: 0,
+        }}
+      >
+        {extractTextFromHTML(popupData[0]?.description)}
+      </p>
+    </div>
+  </div>
+)}
       <Helmet>
         <title>Impel Store - Home</title>
       </Helmet>
