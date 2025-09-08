@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BsSearch } from "react-icons/bs";
 import { FiHeart } from "react-icons/fi";
 import { FcLike } from "react-icons/fc";
+import { Helmet } from "react-helmet-async";
 import {
   FaFilePdf,
   FaLongArrowAltLeft,
@@ -17,7 +18,6 @@ import Accordion from "react-bootstrap/Accordion";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { Helmet } from "react-helmet-async";
 import ShopServices from "../../services/Shop";
 import FilterServices from "../../services/Filter";
 import DealerWishlist from "../../services/Dealer/Collection";
@@ -97,6 +97,13 @@ const [searchInput, setSearchInput] = useState(initialSearch);
     { value: "high_to_low", label: "Price: high to low" },
     { value: "highest_selling", label: "Top Seller" },
   ]);
+
+  const priceRangeOptions = [
+    { value: "0-10000", label: "Under ₹10,000", min: 0, max: 10000 },
+    { value: "0-20000", label: "Under ₹20,000", min: 0, max: 20000 },
+    { value: "0-50000", label: "Under ₹50,000", min: 0, max: 50000 },
+    { value: "50000-above", label: "Above ₹50,000", min: 50000, max: null },
+  ];
 
   // Debounced search handler
   const debouncedSearch = useCallback(
@@ -581,7 +588,33 @@ navigate('/login', { state: { from: location.pathname } });
   return (
     <>
       <Helmet>
-        <title>Impel Store - Shop</title>
+        <title>{`${selectedCategory ? selectedCategory.label : 'All Jewelry'}${selectedGender ? ` - ${selectedGender.label}` : ''}${selectedTag ? ` - ${selectedTag.label}` : ''} | Impel Store`}</title>
+        <meta name="description" content={`Shop ${selectedCategory ? selectedCategory.label : 'jewelry'} at Impel Store. ${
+          PriceRange.maxprice ? `Jewelry under ₹${numberFormat(PriceRange.maxprice)}.` : ''
+        } ${selectedGender ? `${selectedGender.label}'s collection.` : ''} Certified gold jewelry with guaranteed purity.`} />
+        <meta name="keywords" content={`${selectedCategory ? selectedCategory.label.toLowerCase() : 'jewelry'}, ${
+          selectedGender ? selectedGender.label.toLowerCase() : 'gold jewelry'
+        }, ${selectedTag ? selectedTag.label.toLowerCase() : 'certified jewelry'}, buy jewelry online`} />
+        
+        <meta property="og:title" content={`${selectedCategory ? selectedCategory.label : 'All Jewelry'} | Impel Store`} />
+        <meta property="og:description" content={`Shop ${selectedCategory ? selectedCategory.label : 'jewelry'} at Impel Store. ${
+          PriceRange.maxprice ? `Jewelry under ₹${numberFormat(PriceRange.maxprice)}.` : ''
+        } ${selectedGender ? `${selectedGender.label}'s collection.` : ''}`} />
+        <meta property="og:image" content={filterData?.[0]?.image || "https://impelstore.com/default-category-image.jpg"} />
+        <meta property="og:url" content={`https://impelstore.com${location.pathname}${location.search}`} />
+        
+        <link rel="canonical" href={`https://impelstore.com${location.pathname}${location.search}`} />
+        
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": `${selectedCategory ? selectedCategory.label : 'All Jewelry'} - Impel Store`,
+            "description": `Shop ${selectedCategory ? selectedCategory.label : 'jewelry'} at Impel Store.`,
+            "numberOfItems": filterData?.length || 0,
+            "url": `https://impelstore.com${location.pathname}${location.search}`
+          })}
+        </script>
       </Helmet>
       <section className="shop">
         <div className="container">
@@ -652,44 +685,36 @@ navigate('/login', { state: { from: location.pathname } });
                 />
               </div>
               <div className="col-lg-3 col-md-6 col-12 mb-lg-4 mb-md-5 mb-4">
-                <Accordion className="accordian">
-                  <Accordion.Item eventKey="3">
-                    <Accordion.Header>Shop by price</Accordion.Header>
-                    <Accordion.Body className="p-4 mb-2">
-                      <div className="d-flex justify-content-between">
-                        <p>
-                          From :
-                          <strong>
-                            ₹
-                            {PriceRange?.minprice
-                              ? PriceRange?.minprice
-                              : FilterPriceRange.minprice}
-                          </strong>
-                        </p>
-                        <p>
-                          To :
-                          <strong>
-                            ₹
-                            {PriceRange?.maxprice
-                              ? PriceRange?.maxprice
-                              : FilterPriceRange.maxprice}
-                          </strong>
-                        </p>
-                      </div>
-                      <Slider
-                        range
-                        allowCross={false}
-                        min={FilterPriceRange.minprice}
-                        max={FilterPriceRange.maxprice}
-                        marks={{
-                          [FilterPriceRange?.minprice]: "Min",
-                          [FilterPriceRange?.maxprice]: "Max",
-                        }}
-                        onAfterChange={handleSliderChange}
-                      />
-                    </Accordion.Body>
-                  </Accordion.Item>
-                </Accordion>
+                <Select
+                  placeholder="Shop by price range"
+                  isClearable={true}
+                  isSearchable={false}
+                  value={priceRangeOptions.find(
+                    option => 
+                      option.min === PriceRange?.minprice && 
+                      (option.max === PriceRange?.maxprice || 
+                       (option.max === null && PriceRange?.maxprice === FilterPriceRange.maxprice))
+                  )}
+                  options={priceRangeOptions}
+                  onChange={(selected) => {
+                    if (selected) {
+                      handleSliderChange([
+                        selected.min,
+                        selected.max || FilterPriceRange.maxprice
+                      ]);
+                    } else {
+                      setPriceRange({ minprice: null, maxprice: null });
+                      const queryParams = new URLSearchParams(location.search);
+                      queryParams.delete("min_price");
+                      queryParams.delete("max_price");
+                      navigate(
+                        `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
+                          queryParams.toString() ? `?${queryParams.toString()}` : ""
+                        }`
+                      );
+                    }
+                  }}
+                />
               </div>
               <div className="col-lg-3 col-md-6 col-12 mb-lg-4 mb-md-3 mb-2">
                 <button className="btn btn-secondary w-100" onClick={clearFilters}>
