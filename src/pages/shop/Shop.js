@@ -14,7 +14,8 @@ import {
 import toast from "react-hot-toast";
 import Select from "react-select";
 import Accordion from "react-bootstrap/Accordion";
-
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import ShopServices from "../../services/Shop";
@@ -51,8 +52,8 @@ const Shop = () => {
   const [filterData, setFilterData] = useState([]);
   const [paginate, setPaginate] = useState();
   const params = new URLSearchParams(window.location.search);
-  const initialSearch = params.get("search") || "";
-  const [searchInput, setSearchInput] = useState(initialSearch);
+const initialSearch = params.get("search") || "";
+const [searchInput, setSearchInput] = useState(initialSearch);
   const [selectedOption, setSelectedOption] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -64,7 +65,6 @@ const Shop = () => {
     minprice: null,
     maxprice: null,
   });
-  const [selectedPriceOption, setSelectedPriceOption] = useState(null); // New state for dropdown
   const [FilterPriceRange, setFilterPriceRange] = useState({
     minprice: 0,
     maxprice: 0,
@@ -84,15 +84,6 @@ const Shop = () => {
 
   const totalPages = Math.ceil(paginate / pagination?.dataShowLength);
 
-  // Price range options
-  const priceRangeOptions = [
-    { value: [0, 10000], label: 'Below ₹10,000' },
-    { value: [10000, 20000], label: '₹10,000 - ₹20,000' },
-    { value: [20000, 30000], label: '₹20,000 - ₹30,000' },
-    { value: [30000, 40000], label: '₹30,000 - ₹40,000' },
-    { value: [50000, Number.MAX_SAFE_INTEGER], label: '₹50,000 and above' }
-  ];
-
   const scrollup = () => {
     window.scrollTo({
       top: 0,
@@ -109,33 +100,35 @@ const Shop = () => {
 
   // Debounced search handler
   const debouncedSearch = useCallback(
-    debounce((searchedText) => {
-      setIsLoading(true);
-      const queryParams = new URLSearchParams(location.search);
-      queryParams.delete("page");
-      if (searchedText?.trim().length > 0) {
-        queryParams.set("search", searchedText);
-      } else {
-        queryParams.delete("search");
-      }
-      navigate(
-        `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
-          queryParams.toString() ? `?${queryParams.toString()}` : ""
-        }`
-      );
-      setPagination((prev) => ({ ...prev, currentPage: 1 }));
-    }, 500),
-    [location.search, tagNameFromUrl, navigate]
-  );
+  debounce((searchedText) => {
+    setIsLoading(true);
+    const queryParams = new URLSearchParams(location.search);
+    queryParams.delete("page");
+    if (searchedText?.trim().length > 0) {
+      queryParams.set("search", searchedText);
+    } else {
+      queryParams.delete("search");
+    }
+    navigate(
+      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`
+    );
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  }, 500),
+  [location.search, tagNameFromUrl, navigate]
+);
+
 
   const searchbar = useCallback(
-    (e) => {
-      const searchedText = e.target.value;
-      setSearchInput(searchedText); // Keep typed value
-      debouncedSearch(searchedText); // Pass raw value, not uppercase
-    },
-    [debouncedSearch]
-  );
+  (e) => {
+    const searchedText = e.target.value;
+    setSearchInput(searchedText); // Keep typed value
+    debouncedSearch(searchedText); // Pass raw value, not uppercase
+  },
+  [debouncedSearch]
+);
+
 
   const handleSelectCategory = (categoryId) => {
     setIsLoading(true);
@@ -145,7 +138,6 @@ const Shop = () => {
     setSelectedGender(null);
     setSelectedTag(null);
     setPriceRange({ minprice: null, maxprice: null });
-    setSelectedPriceOption(null); // Reset price option
     queryParams.delete("search");
     queryParams.delete("gender_id");
     queryParams.delete("sort_by");
@@ -216,49 +208,20 @@ const Shop = () => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
 
-  // Updated price range handler
-  const handlePriceRangeChange = (selected) => {
+  const handleSliderChange = (e) => {
     setIsLoading(true);
     const queryParams = new URLSearchParams(location.search);
     queryParams.delete("page");
-    
-    if (selected) {
-      const [minPrice, maxPrice] = selected.value;
-      queryParams.set("min_price", minPrice);
-      queryParams.set("max_price", maxPrice === Number.MAX_SAFE_INTEGER ? 999999999 : maxPrice);
-      setPriceRange({ minprice: minPrice, maxprice: maxPrice });
-      setSelectedPriceOption(selected);
-    } else {
-      queryParams.delete("min_price");
-      queryParams.delete("max_price");
-      setPriceRange({ minprice: null, maxprice: null });
-      setSelectedPriceOption(null);
-    }
-    
+    queryParams.set("min_price", e[0]);
+    queryParams.set("max_price", e[1]);
     navigate(
       `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`
     );
+    setPriceRange({ minprice: e[0], maxprice: e[1] });
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
-
-  const handleSliderChange = useCallback((e) => {
-    setIsLoading(true);
-    const queryParams = new URLSearchParams(location.search);
-    queryParams.delete("page");
-    if (e[0] !== null && e[1] !== null) {
-      queryParams.set("min_price", e[0]);
-      queryParams.set("max_price", e[1]);
-      setPriceRange({ minprice: e[0], maxprice: e[1] });
-    }
-    navigate(
-      `/shop${tagNameFromUrl ? `/${encodeURIComponent(tagNameFromUrl.toLowerCase().replace(/\s+/g, "-"))}` : ""}${
-        queryParams.toString() ? `?${queryParams.toString()}` : ""
-      }`
-    );
-    setPagination((prev) => ({ ...prev, currentPage: 1 }));
-  }, [location.search, navigate, tagNameFromUrl]);
 
   const clearFilters = () => {
     setSearchInput(null);
@@ -267,7 +230,6 @@ const Shop = () => {
     setSelectedGender(null);
     setSelectedTag(null);
     setPriceRange({ minprice: null, maxprice: null });
-    setSelectedPriceOption(null); // Reset price option
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
     navigate(`/shop`);
   };
@@ -321,6 +283,8 @@ const Shop = () => {
       const genderRes = await FilterServices.genderFilter();
       setGenderData(genderRes?.data || []);
 
+
+
       if (categoryRes?.data && currentCategory) {
         const Category_ids = categoryRes?.data?.find(
           (item) => item?.id === Number(currentCategory)
@@ -369,23 +333,23 @@ const Shop = () => {
         setSelectedTag(null);
       }
 
-      // Updated price range logic
-      if (currentMinPrice && currentMaxPrice) {
-        const minPrice = Number(currentMinPrice);
-        const maxPrice = Number(currentMaxPrice);
-        
-        setPriceRange({ minprice: minPrice, maxprice: maxPrice });
-        
-        // Find matching price range option
-        const matchingOption = priceRangeOptions.find(option => {
-          const [optionMin, optionMax] = option.value;
-          return optionMin === minPrice && (optionMax === maxPrice || (optionMax === Number.MAX_SAFE_INTEGER && maxPrice >= 999999999));
-        });
-        
-        setSelectedPriceOption(matchingOption || null);
+      if (
+        (filterResponse?.data?.minprice && currentMinPrice) ||
+        currentMaxPrice
+      ) {
+        const selectedPrice = {
+          minprice:
+            filterResponse?.data?.minprice !== null
+              ? parseFloat(filterResponse?.data?.minprice)
+              : FilterPriceRange.minprice,
+          maxprice:
+            filterResponse?.data?.maxprice !== null
+              ? parseFloat(filterResponse?.data?.maxprice)
+              : FilterPriceRange.maxprice,
+        };
+        setPriceRange(selectedPrice);
       } else {
         setPriceRange({ minprice: null, maxprice: null });
-        setSelectedPriceOption(null);
       }
     } catch (err) {
       console.error("Error fetching filter data:", err);
@@ -424,22 +388,6 @@ const Shop = () => {
   };
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const min = queryParams.get("min_price");
-    const max = queryParams.get("max_price");
-    
-    if (min && max) {
-      const minPrice = parseFloat(min);
-      const maxPrice = parseFloat(max);
-      setPriceRange({ minprice: minPrice, maxprice: maxPrice });
-      
-      // Find and set matching price option
-      const matchingOption = priceRangeOptions.find(option => {
-        const [optionMin, optionMax] = option.value;
-        return optionMin === minPrice && (optionMax === maxPrice || (optionMax === Number.MAX_SAFE_INTEGER && maxPrice >= 999999999));
-      });
-      setSelectedPriceOption(matchingOption || null);
-    }
     FilterData();
   }, [location.pathname, location.search]);
 
@@ -611,7 +559,7 @@ const Shop = () => {
   const UserLogin = (e) => {
     e.preventDefault();
     localStorage.setItem("redirectPath", location.pathname);
-    navigate('/login', { state: { from: location.pathname } });
+navigate('/login', { state: { from: location.pathname } });
   };
 
   const DealerLogin = (e) => {
@@ -704,15 +652,44 @@ const Shop = () => {
                 />
               </div>
               <div className="col-lg-3 col-md-6 col-12 mb-lg-4 mb-md-5 mb-4">
-                <Select
-                  value={selectedPriceOption}
-                  onChange={handlePriceRangeChange}
-                  options={priceRangeOptions}
-                  isClearable
-                  placeholder="Select price range"
-                  className="basic-single"
-                  classNamePrefix="select"
-                />
+                <Accordion className="accordian">
+                  <Accordion.Item eventKey="3">
+                    <Accordion.Header>Shop by price</Accordion.Header>
+                    <Accordion.Body className="p-4 mb-2">
+                      <div className="d-flex justify-content-between">
+                        <p>
+                          From :
+                          <strong>
+                            ₹
+                            {PriceRange?.minprice
+                              ? PriceRange?.minprice
+                              : FilterPriceRange.minprice}
+                          </strong>
+                        </p>
+                        <p>
+                          To :
+                          <strong>
+                            ₹
+                            {PriceRange?.maxprice
+                              ? PriceRange?.maxprice
+                              : FilterPriceRange.maxprice}
+                          </strong>
+                        </p>
+                      </div>
+                      <Slider
+                        range
+                        allowCross={false}
+                        min={FilterPriceRange.minprice}
+                        max={FilterPriceRange.maxprice}
+                        marks={{
+                          [FilterPriceRange?.minprice]: "Min",
+                          [FilterPriceRange?.maxprice]: "Max",
+                        }}
+                        onAfterChange={handleSliderChange}
+                      />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
               </div>
               <div className="col-lg-3 col-md-6 col-12 mb-lg-4 mb-md-3 mb-2">
                 <button className="btn btn-secondary w-100" onClick={clearFilters}>

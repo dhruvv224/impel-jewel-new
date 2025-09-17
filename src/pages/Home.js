@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 import FilterServices from "../services/Filter";
@@ -132,28 +133,11 @@ const Home = () => {
       setPopupTimer(popupData[0].timer);
     }
   }, [popupData]);
-
-  // Control body scroll when popup is open
-  useEffect(() => {
-    if (showPopup) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [showPopup]);
   return (
     <>
       {/* Popup */}
       {showPopup && popupData?.[0] && (
   <div
-    onClick={(e) => {
-      if (e.target === e.currentTarget) {
-        setShowPopup(false);
-      }
-    }}
     style={{
       position: "fixed",
       top: 0,
@@ -167,80 +151,53 @@ const Home = () => {
       justifyContent: "center",
       animation: "fadeIn 0.5s",
       backdropFilter: "blur(4px)", // Adds a subtle blur to the background
-      cursor: "pointer", // Indicates clickable area
     }}
   >
     <div
-      onClick={(e) => e.stopPropagation()}  // Prevent clicks inside popup from closing it
       style={{
-        background: "#f0e1cc",
+        background: "#fff",
         borderRadius: "24px",
         boxShadow: "0 16px 64px rgba(0,0,0,0.3)", // Stronger, more prominent shadow
         padding: "48px 48px 36px 48px",
-        maxWidth: "1100px", // Increased max-width for a bigger popup
+        maxWidth: "800px", // Increased max-width for a bigger popup
         width: "90%",
-        maxHeight: "90vh", // Maximum height of 90% of viewport height
-        overflowY: "auto", // Add scrollbar to popup content if needed
         textAlign: "center",
         position: "relative",
+        overflow: "hidden",
         border: "1px solid #e0e0e0", // A subtle border
-        overflowY: "auto", // Enable vertical scrolling
-        msOverflowStyle: "none", // Hide scrollbar in IE and Edge
-        scrollbarWidth: "none", // Hide scrollbar in Firefox
-        "&::-webkit-scrollbar": { // Hide scrollbar in Chrome/Safari
-          display: "none"
-        }
       }}
     >
       <button
         onClick={() => setShowPopup(false)}
         style={{
           position: "absolute",
-          top: "8px",
-          right: "8px",
+          top: "16px",
+          right: "16px",
+          background: "transparent",
           border: "none",
-          width: "30px",
-          height: "30px",
-          fontSize: "24px",
+          width: "32px",
+          height: "32px",
+          fontSize: "24px", // Bigger icon
           cursor: "pointer",
-          color: "#c9b290",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "all 0.2s",
-          zIndex: 10,
-          lineHeight: "0",
-          padding: "0",
-          background: "transparent"
+          color: "#aaa", // Softer color
+          transition: "color 0.2s",
         }}
-        onMouseOver={e => {
-          e.currentTarget.style.transform = 'scale(1.1)';
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
+        onMouseOver={e => e.currentTarget.style.color = '#bfa76f'}
+        onMouseOut={e => e.currentTarget.style.color = '#aaa'}
         aria-label="Close"
       >
-        ×
+        &times;
       </button>
 
-      <div style={{
-        border: "2px solid #c9b290",
-        borderRadius: "16px",
-        padding: "15px",
-        margin: "-15px",
-        position: "relative",
-        height: "100%"
-      }}>
-        {popupData[0]?.image && (
-          <img
-            src={popupData[0]?.image}
-            alt={popupData[0]?.title}
-            style={{
-              width: "100%", 
-              height: "100%",
-              objectFit: "cover",
-              borderRadius: "12px", // Slightly reduced to account for parent border
+      {popupData[0]?.image && (
+        <img
+          src={popupData[0]?.image}
+          alt={popupData[0]?.title}
+          style={{
+            width: "100%", // Larger image size
+            height: "100%",
+            objectFit: "cover",
+            borderRadius: "18px", // Square image with slightly rounded corners
             marginBottom: "36px",
             boxShadow: "0 8px 32px rgba(0,0,0,0.15)", // A more impactful shadow
             border: "4px solid #bfa76f",
@@ -258,56 +215,22 @@ const Home = () => {
       >
         {popupData[0]?.title}
       </h2>
-      <div
+      <p
         style={{
           color: "#666", // Softer body text color
           fontSize: "18px", // Slightly larger body text
           lineHeight: "1.6", // Better line spacing for readability
           marginBottom: 0,
         }}
-        dangerouslySetInnerHTML={{
-          __html: popupData[0]?.description
-        }}
-        className="popup-content"
-      />
-      <button
-        style={{
-          background: "linear-gradient(to right, #c9b290, #bfa76f)",
-          color: "#fff",
-          border: "none",
-          padding: "12px 30px",
-          borderRadius: "25px",
-          fontSize: "16px",
-          fontWeight: "600",
-          marginTop: "24px",
-          cursor: "pointer",
-          transition: "all 0.3s ease",
-          boxShadow: "0 4px 15px rgba(191, 167, 111, 0.2)",
-        }}
-        onMouseOver={e => {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(191, 167, 111, 0.3)';
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 4px 15px rgba(191, 167, 111, 0.2)';
-        }}
-        onClick={() => {
-          setShowPopup(false);
-          if (popupData[0]?.btn_url) {
-            window.location.href = popupData[0].btn_url;
-          }
-        }}
       >
-        { 'Explore Collection'}
-      </button>
-      </div>
-     
-
+        {extractTextFromHTML(popupData[0]?.description)}
+      </p>
     </div>
   </div>
 )}
-
+      <Helmet>
+        <title>Impel Store - Home</title>
+      </Helmet>
       <WomansClub />
       {/* Hero Banner */}
       <section className="banner position-relative">

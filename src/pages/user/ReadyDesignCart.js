@@ -563,101 +563,92 @@ const ReadyDesignCart = () => {
   };
 
   useEffect(() => {
-    const processOrder = async () => {
-      if (location.pathname === "/ready-processing-order" && Items.length > 0) {
-        const queryParams = new URLSearchParams(location.search);
-        const transaction_id = queryParams.get("transaction_id");
-        
-        // If we've already processed this transaction, don't do it again
-        if (transaction_id && localStorage.getItem(`processed_${transaction_id}`)) {
-          return;
-        }
+    if (location.pathname === "/ready-processing-order") {
+      const queryParams = new URLSearchParams(location.search);
+      const transaction_id = queryParams.get("transaction_id") || "";
 
-        let totalNetWeight = 0;
-        let totalGrossWeight = 0;
+      let totalNetWeight = 0;
+      let totalGrossWeight = 0;
 
-        Items.forEach((item) => {
-          totalNetWeight += item.net_weight;
-          totalGrossWeight += item.gross_weight;
-        });
+      Items.forEach((item) => {
+        totalNetWeight += item.net_weight;
+        totalGrossWeight += item.gross_weight;
+      });
 
-        try {
-          const shipmentRes = await UserService.ShipmentCreate({
-            consignee_name: profileData?.name,
-            address_line1: profileData?.shipping_address,
-            address_line2:
-              profileData?.shipping_city_name +
-              "," +
-              profileData?.shipping_state_name,
-            pinCode: profileData?.shipping_pincode,
-            auth_receiver_name: profileData?.name,
-            auth_receiver_phone: profileData?.phone?.replace("+91", ""),
-            net_weight: totalNetWeight.toString(),
-            gross_weight: totalGrossWeight.toString(),
-            net_value: numberFormat(overAllAmount),
-            codValue: "",
-            no_of_packages: "1",
-            boxes: [
-              {
-                box_number: "",
-                lock_number: "",
-                length: "",
-                breadth: "",
-                height: "",
-                gross_weight: "",
-              },
-            ],
-          });
-
-          if (shipmentRes?.status === "true" && shipmentRes?.data?.docket_number) {
-            const docketNumber = shipmentRes.data.docket_number;
+      UserService.ShipmentCreate({
+        consignee_name: profileData?.name,
+        address_line1: profileData?.shipping_address,
+        address_line2:
+          profileData?.shipping_city_name +
+          "," +
+          profileData?.shipping_state_name,
+        pinCode: profileData?.shipping_pincode,
+        auth_receiver_name: profileData?.name,
+        auth_receiver_phone: profileData?.phone?.replace("+91", ""),
+        net_weight: totalNetWeight.toString(),
+        gross_weight: totalGrossWeight.toString(),
+        net_value: numberFormat(overAllAmount),
+        codValue: "",
+        no_of_packages: "1",
+        boxes: [
+          {
+            box_number: "",
+            lock_number: "",
+            length: "",
+            breadth: "",
+            height: "",
+            gross_weight: "",
+          },
+        ],
+      })
+        .then((res) => {
+          if (res?.status == "true" && res?.data?.docket_number) {
+            const docketNumber = res.data.docket_number;
             setDocket_Number(docketNumber);
 
-            const orderRes = await axios.post(api + "ready/purchase-order", {
-              user_id: user_id,
-              payment_method: "phonepe",
-              cart_items: Items.map((item) => item.id),
-              sub_total: SubAmount(),
-              gst_amount: SubGST().toFixed(),
-              total: overAllAmount?.toFixed(),
-              transaction_id: transaction_id || "",
-              dealer_code: code?.dealer_code || "",
-              dealer_discount_type: code?.discount_type || "",
-              dealer_discount_value: code?.discount_value || "",
-              charges: SubCharge()?.toFixed() || "",
-              docate_number: docketNumber,
-            });
-
-            if (orderRes.data.status === true) {
-              // Mark this transaction as processed
-              if (transaction_id) {
-                localStorage.setItem(`processed_${transaction_id}`, 'true');
-              }
-              
-              resetcartcount({ type: "RESET_CART" });
-              toast.success(orderRes.data.message);
-              localStorage.removeItem("dealerDiscount");
-              localStorage.removeItem("dealermessage");
-              
-              setTimeout(() => {
-                navigate(`/ready-order-details/?${orderRes?.data?.data}`);
-              }, 1000);
-            } else {
-              toast.error(orderRes.data.message);
-              navigate("/");
+            if (Items.length > 0) {
+              axios
+                .post(api + "ready/purchase-order", {
+                  user_id: user_id,
+                  payment_method: "phonepe",
+                  cart_items: Items.map((item) => item.id),
+                  sub_total: SubAmount(),
+                  gst_amount: SubGST().toFixed(),
+                  total: overAllAmount?.toFixed(),
+                  transaction_id: transaction_id ? transaction_id : "",
+                  dealer_code: code?.dealer_code || "",
+                  dealer_discount_type: code?.discount_type || "",
+                  dealer_discount_value: code?.discount_value || "",
+                  charges: SubCharge()?.toFixed() || "",
+                  docate_number: docketNumber ? docketNumber : "",
+                })
+                .then((res) => {
+                  if (res.data.status === true) {
+                    resetcartcount({ type: "RESET_CART" });
+                    toast.success(res.data.message);
+                    localStorage.removeItem("dealerDiscount");
+                    localStorage.removeItem("dealermessage");
+                    setTimeout(() => {
+                      navigate(`/ready-order-details/?${res?.data?.data}`);
+                    }, 1000);
+                  } else {
+                    toast.error(res.data.message);
+                    navigate("/");
+                  }
+                  setIsLoading(false);
+                })
+                .catch((error) => {
+                  console.log(error);
+                  setIsLoading(false);
+                });
             }
           }
-        } catch (err) {
-          console.error(err);
-          toast.error("An error occurred while processing your order");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    processOrder();
-  }, [location.pathname, location.search]);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [location.pathname, location.search, Items]);
 
   const handleClose = () => {
     setShowEdit(false);
@@ -1071,23 +1062,15 @@ const DiscountAmount = () => {
 const SubTotalAfterDiscount = () => {
   return SubAmount() - DiscountAmount();
 };
-console.log("helooooo")
   return (
     <>
       <Helmet>
         <title>Impel Store - Ready products cart</title>
       </Helmet>
 
-     {location.pathname === "/ready-processing-order" ? (
-  isLoading ? (
-    <Loader />
-  ) : (
-    <div className="container text-center">
-      <h4>Processing your order...</h4>
-      <p>Please wait while we confirm your payment.</p>
-    </div>
-  )
-) :(
+      {location.pathname === "/ready-processing-order" ? (
+        <Loader />
+      ) : (
         <>
           <section className="cart">
             <div className="container">
